@@ -1,0 +1,15 @@
+{
+  "Materials": [
+    {
+      "Name": "testgwd",
+      "Template": "blend1.tmat",
+      "Param1": "testgwd"
+    }
+  ],
+  "Spritesheets": [
+    {
+      "File": "testgwd.json",
+      "Material": "testgwd"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+    "Description": "Material with alpha blending",
+    "Case0": {
+        "Texture0": {
+            "Async": false,
+            "File": "#param1#.png"
+        },
+        "MaterialType": "GLSL",
+		"Shader": "internal_glsl_onetexture",
+		"Blending": "ONE ONE_MINUS_SRC_ALPHA",
+        "ZBuffer": "NEVER"
+    }
+}

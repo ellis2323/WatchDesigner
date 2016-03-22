@@ -1,0 +1,13 @@
+{
+    "Description": "Material Description",
+    "Case0": {
+        "Texture0": {
+            "File": "#param1#.png",
+            "Async": false
+        },
+		"MaterialType": "GLSL",
+		"Shader": "font_glow",
+		"Blending": "SRC_ALPHA ONE_MINUS_SRC_ALPHA",
+        "ZBuffer": "NEVER"
+    }
+}

@@ -1,0 +1,55 @@
+{
+    "Widgets": [
+        {
+            "Widget": "node", 
+            "Name": "loading", 
+            "Align": "center", 
+            "Visible": true, 
+            "VAlign": "center", 
+            "Position": [
+                0.0, 
+                0.0, 
+                2560.0, 
+                1504.0
+            ], 
+            "ID": 47000
+        }, 
+        {
+            "SpineDir": "menu_animations", 
+            "Widget": "spine", 
+            "SpineSize": [
+                1617, 
+                909
+            ], 
+            "Name": "anim_loading", 
+            "Parent": 47000, 
+            "SpineAtlas": "animation_loading_bw", 
+            "Image": "frame0", 
+            "Visible": true, 
+            "SpineAnim": "animation", 
+            "VAlign": "center", 
+            "Position": [
+                0.0, 
+                0.0, 
+                2560.0, 
+                1504.0
+            ], 
+            "SpineFile": "animation_loading", 
+            "Align": "center", 
+            "ID": 47001, 
+            "Loop": true
+        }
+    ], 
+    "SceneSize": [
+        2560.0, 
+        1504.0
+    ], 
+    "Spritesheets": [], 
+    "Materials": [
+        {
+            "Param1": "animation_loading_bw", 
+            "Name": "animation_loading_bw_spine", 
+            "Template": "blend1.tmat"
+        }
+    ]
+}
