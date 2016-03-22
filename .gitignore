@@ -17,4 +17,4 @@ build.properties
 
 # C/C++ files, libraries or archives
 **/*.so
-
+wear/src/main/jni
