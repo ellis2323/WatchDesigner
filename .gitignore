@@ -10,6 +10,9 @@
 /captures
 build.number
 build.properties
+# scripts
+cplibs.sh
+wear/src/main/upload.sh
 
 # OS junk files
 [Tt]humbs.db
@@ -18,3 +21,4 @@ build.properties
 # C/C++ files, libraries or archives
 **/*.so
 wear/src/main/jni
+wear/src/main/obj
