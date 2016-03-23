@@ -70,6 +70,12 @@
             android:name=".IOWatchfacePermissionActivity"
             android:label="@string/title_activity_calendar_watch_face_permission" >
         </activity>
+
+        <service android:name="com.google.devrel.wcl.WclWearableListenerService">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

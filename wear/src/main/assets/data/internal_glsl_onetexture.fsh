@@ -19,13 +19,11 @@ varying vec4 vColor;
 
 void main()
 {
-    //gl_FragColor = texture2D(iChannel0, vTexCoord0) * vColor;
 #ifdef GL_ES
     lowp vec4 color = texture2D(iChannel0, vTexCoord0, 0.) * vColor;
 #else
     vec4 color = texture2D(iChannel0, vTexCoord0, 0.) * vColor;
 #endif
-    color.xyz *= vColor.a;
     gl_FragColor = color; 
 }
 

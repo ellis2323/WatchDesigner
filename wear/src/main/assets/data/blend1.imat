@@ -4,7 +4,7 @@
         "Image0": "#image0#",
         "MaterialType": "GLSL",
 		"Shader": "internal_glsl_onetexture",
-		"Blending": "SRC_ALPHA ONE_MINUS_SRC_ALPHA",
+		"Blending": "ONE ONE_MINUS_SRC_ALPHA",
         "ZBuffer": "NEVER"
     }
 }
