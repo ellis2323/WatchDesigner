@@ -112,5 +112,8 @@ dependencies {
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.google.android.gms:play-services-gcm:8.4.0'
     compile 'org.jraf:prefs:1.0.1'
+
+    compile "commons-io:commons-io:+"
+    compile 'org.zeroturnaround:zt-zip:1.9'
     compile project(':WearCompanionLibrary:WCL')
 }

@@ -1,8 +1,13 @@
 package com.iopixel.watchface.wear;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.res.AssetManager;
 
 import com.google.devrel.wcl.WearManager;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /*
  * Copyright (C) 2016 Laurent Mallet All Rights Reserved.

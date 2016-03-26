@@ -17,21 +17,26 @@
 package com.iopixel.watchface.wear;
 
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.wearable.companion.WatchFaceCompanion;
 import android.util.Log;
-import android.widget.TextView;
+
+import org.apache.commons.io.FileUtils;
+import org.zeroturnaround.zip.ZipUtil;
+
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Iterator;
 
 /**
 
@@ -41,6 +46,15 @@ public class WatchFaceConfigActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+        try {
+            UnzipAssets("data/text.gwd", "toto");
+            File outputDir = getOutputDir("toto");
+            deletePngInDirectory(outputDir);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         Intent intent = getIntent();
         String action = intent.getAction();
@@ -84,21 +98,42 @@ public class WatchFaceConfigActivity extends Activity {
         }
     }
 
-    private void InputStreamToFile(InputStream in, String file) {
-        try {
-            OutputStream out = new FileOutputStream(new File(file));
 
-            int size = 0;
-            byte[] buffer = new byte[1024];
+    private boolean UnzipAssets(String filepath, String dirName) throws IOException {
+        File outputDir = getOutputDir(dirName);
+        FileUtils.deleteDirectory(outputDir);
+        outputDir.mkdir();
+        AssetManager am = getAssets();
+        InputStream is = am.open(filepath);
+        ZipUtil.unpack(is, outputDir);
+        return true;
+    }
 
-            while ((size = in.read(buffer)) != -1) {
-                out.write(buffer, 0, size);
+    private File getOutputDir(String dirName) {
+        String basepath = getFilesDir().getAbsolutePath();
+        String dirpath = basepath + File.separator + dirName;
+        return new File(dirpath);
+    }
+
+    private void deleteDirectory(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++) {
+                new File(dir, children[i]).delete();
             }
-
-            out.close();
-        }
-        catch (Exception e) {
-            Log.e("MainActivity", "InputStreamToFile exception: " + e.getMessage());
         }
     }
+
+    private void deletePngInDirectory(File dir) {
+        String[] exts = { "png" };
+        Iterator it = FileUtils.iterateFiles(dir, exts, true);
+        while (it.hasNext()) {
+            File file = (File) it.next();
+            if (file != null) {
+                file.delete();
+            }
+        }
+
+    }
+
 }
