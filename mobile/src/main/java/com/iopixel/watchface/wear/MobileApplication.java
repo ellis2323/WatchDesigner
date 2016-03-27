@@ -1,22 +1,12 @@
-package com.iopixel.watchface.wear;
-
-import android.app.Application;
-import android.content.Context;
-import android.content.res.AssetManager;
-
-import com.google.devrel.wcl.WearManager;
-
-import java.io.IOException;
-import java.io.InputStream;
-
 /*
- * Copyright (C) 2016 Laurent Mallet All Rights Reserved.
+ * Copyright (C) 2016 Benoit 'BoD' Lubek (BoD@JRAF.org)
+ * Copyright (C) 2016 Laurent Mallet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,11 +14,25 @@ import java.io.InputStream;
  * See the License for the specific language governing permissions and
  * imitations under the License.
  */
+package com.iopixel.watchface.wear;
+
+import android.app.Application;
+
+import org.jraf.android.util.log.Log;
+
+import com.google.devrel.wcl.WearManager;
+
 public class MobileApplication extends Application {
+    private static final String TAG = "WatchDesigner";
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // Log
+        Log.init(this, TAG);
+
+        // Wear Companion Library
         WearManager.initialize(getApplicationContext());
     }
 
