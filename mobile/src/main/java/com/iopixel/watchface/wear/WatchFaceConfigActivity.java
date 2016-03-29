@@ -18,7 +18,10 @@ package com.iopixel.watchface.wear;
 
 import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -43,10 +46,13 @@ import java.util.Iterator;
  */
 public class WatchFaceConfigActivity extends Activity {
 
+    public static final String TAG = "iopixel";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        nativeCreate(getAPKFileName(), getInternalStoragePath());
 
         try {
             UnzipAssets("data/text.gwd", "toto");
@@ -103,6 +109,9 @@ public class WatchFaceConfigActivity extends Activity {
         File outputDir = getOutputDir(dirName);
         FileUtils.deleteDirectory(outputDir);
         outputDir.mkdir();
+        // create spritesheets
+        File sps = new File(outputDir.getAbsolutePath() + File.separator + "spritesheets");
+        sps.mkdir();
         AssetManager am = getAssets();
         InputStream is = am.open(filepath);
         ZipUtil.unpack(is, outputDir);
@@ -135,5 +144,34 @@ public class WatchFaceConfigActivity extends Activity {
         }
 
     }
+
+    public String getAPKFileName() {
+        try {
+            ApplicationInfo appInfo = getPackageManager().getApplicationInfo(getPackageName(), 0);
+            return appInfo.sourceDir;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Error when locating the apk filename");
+        }
+        return "";
+    }
+
+    public String getInternalStoragePath() {
+        Context ctx = getApplicationContext();
+        if (ctx.getFilesDir() == null) {
+            Log.e(TAG, "error, getFilesDir is null");
+        }
+
+        if (!ctx.getFilesDir().exists()) {
+            ctx.getFilesDir().mkdir();
+        }
+        return ctx.getFilesDir().getAbsolutePath();
+    }
+
+    // JNI
+    static {
+        System.loadLibrary("watchface");
+    }
+
+    public static native void nativeCreate(String apkPath, String pwdPath);
 
 }

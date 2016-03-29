@@ -5,6 +5,7 @@
 /.idea/libraries
 .DS_Store
 /build
+/common/build
 /mobile/build
 /wear/build
 /captures
@@ -26,3 +27,5 @@ wear/src/main/upload.sh
 **/*.so
 wear/src/main/jni
 wear/src/main/obj
+common/src/main/jni
+common/src/main/obj

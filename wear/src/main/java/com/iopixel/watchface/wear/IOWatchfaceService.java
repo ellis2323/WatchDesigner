@@ -31,6 +31,7 @@ import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.fitness.result.DailyTotalResult;
 
 import com.iopixel.library.I18NEngine;
+import com.iopixel.library.Native;
 
 import java.util.List;
 import java.util.TimeZone;
@@ -40,7 +41,7 @@ import java.util.TimeZone;
  */
 public class IOWatchfaceService extends Gles2WatchFaceService {
 
-    public static final String TAG = "IOWFS-iopixel";
+    public static final String TAG = "iopixel";
     public static final boolean DEBUG = true;
     public static Engine sEngine;
 
@@ -127,25 +128,24 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
         @Override
         public void onDestroy() {
             logInfo("onDestroy");
-            nativeDestroy();
+            Native.Destroy();
         }
 
         @Override
         public void onGlContextCreated() {
             super.onGlContextCreated();
-            nativeCreate(getAPKFileName(), getInternalStoragePath());
         }
 
         @Override
         public void onGlSurfaceCreated(int width, int height) {
             super.onGlSurfaceCreated(width, height);
-            nativeOnSurfaceCreated(width, height);
+            Native.OnSurfaceCreated(getAPKFileName(), getInternalStoragePath(), width, height);
         }
 
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode) {
             super.onAmbientModeChanged(inAmbientMode);
-            nativeAmbientMode(inAmbientMode);
+            Native.AmbientMode(inAmbientMode);
             invalidate();
         }
 
@@ -168,7 +168,7 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
                     mGoogleApiClient.disconnect();
                 }
             }
-            nativeVisibilityChanged(visible);
+            Native.VisibilityChanged(visible);
         }
 
         private void registerReceiver() {
@@ -199,10 +199,10 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
         public void onApplyWindowInsets(WindowInsets insets) {
             super.onApplyWindowInsets(insets);
             if(insets.isRound()){
-                nativeShape(1);
+                Native.Shape(1);
             }
             else{
-                nativeShape(0);
+                Native.Shape(0);
             }
 
         }
@@ -213,7 +213,7 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
             GLES20.glClearColor(0.5f, 0.2f, 0.2f, 1);
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-            nativeOnDraw();
+            Native.OnDraw();
             if (isVisible() && !isInAmbientMode()) {
                 invalidate();
             }
@@ -224,7 +224,7 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
             switch (tapType) {
                 case WatchFaceService.TAP_TYPE_TAP:
                     logInfo("tap " + x + " " + y);
-                    nativeSendEvent(x, y);
+                    Native.SendEvent(x, y);
                     break;
 
                 case WatchFaceService.TAP_TYPE_TOUCH:
@@ -305,11 +305,6 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
         }
     }
 
-    // JNI
-    static {
-        System.loadLibrary("watchface");
-    }
-
     public static int getSteps() {
         if (sEngine != null) {
             return sEngine.mStepsTotal;
@@ -317,13 +312,5 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
         return 0;
     }
 
-    // JNI methods
-    public static native void nativeCreate(String apkPath, String pwdPath);
-    public static native void nativeDestroy();
-    public static native void nativeOnSurfaceCreated(int width, int height);
-    public static native void nativeShape(int shape);
-    public static native void nativeOnDraw();
-    public static native void nativeSendEvent(int x, int y);
-    public static native void nativeAmbientMode(boolean mode);
-    public static native void nativeVisibilityChanged(boolean visibility);
+
 }

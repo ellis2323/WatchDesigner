@@ -111,11 +111,12 @@ dependencies {
     compile "com.android.support:design:${supportLibVersion}"
 
     // Google Play Services
-    compile 'com.google.android.gms:play-services-gcm:8.3.0'
+    compile 'com.google.android.gms:play-services-gcm:8.4.0'
 
     // Wear companion library
     // Exclude their Play Services dependency because they use an old version - force using our version instead.
     compile(project(':WearCompanionLibrary:WCL')) /*{ exclude group: 'com.google.android.gms' }*/
+    compile(project(':common'))
 
     // Prefs
     apt 'org.jraf:prefs-compiler:1.0.1'

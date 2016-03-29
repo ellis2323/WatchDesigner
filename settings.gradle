@@ -1,1 +1,1 @@
-include ':mobile', ':wear', ':WearCompanionLibrary:WCL'
+include ':mobile', ':wear', ':common', ':WearCompanionLibrary:WCL'
