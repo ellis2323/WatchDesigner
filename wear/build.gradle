@@ -44,10 +44,13 @@ android {
 }
 
 dependencies {
-    compile 'com.google.android.support:wearable:1.3.0'
-    compile 'com.google.android.gms:play-services-fitness:8.4.0'
-    compile 'com.google.android.gms:play-services-wearable:8.4.0'
-    compile project(':WearCompanionLibrary:WCL')
+    // Google Play Services
+    compile "com.google.android.gms:play-services-fitness:${playServicesVersion}"
+
+    // Common module
     compile project(':common')
+
+    // Other libs
+    compile 'com.google.android.support:wearable:1.3.0'
     compile 'com.github.BoD:jraf-android-util:-SNAPSHOT'
 }

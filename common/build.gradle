@@ -29,5 +29,9 @@ android {
 }
 
 dependencies {
-    compile 'com.google.android.gms:play-services-wearable:8.4.0'
+    // Google Play Services
+    compile "com.google.android.gms:play-services-wearable:${playServicesVersion}"
+
+    // Wear companion library
+    compile project(':WearCompanionLibrary:WCL')
 }

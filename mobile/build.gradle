@@ -100,8 +100,6 @@ android.applicationVariants.all { variant ->
     }
 }
 
-ext.supportLibVersion = '23.2.1'
-
 dependencies {
     // Support library
     compile "com.android.support:recyclerview-v7:${supportLibVersion}"
@@ -111,12 +109,10 @@ dependencies {
     compile "com.android.support:design:${supportLibVersion}"
 
     // Google Play Services
-    compile 'com.google.android.gms:play-services-gcm:8.4.0'
+    compile "com.google.android.gms:play-services-gcm:${playServicesVersion}"
 
-    // Wear companion library
-    // Exclude their Play Services dependency because they use an old version - force using our version instead.
-    compile(project(':WearCompanionLibrary:WCL')) /*{ exclude group: 'com.google.android.gms' }*/
-    compile(project(':common'))
+    // Common module
+    compile project(':common')
 
     // Prefs
     apt 'org.jraf:prefs-compiler:1.0.1'
@@ -125,9 +121,9 @@ dependencies {
     // Other libs
     compile 'com.squareup.okhttp3:okhttp:3.1.2'
     compile 'com.squareup.picasso:picasso:2.5.2'
-    compile "commons-io:commons-io:+"
-    compile 'org.zeroturnaround:zt-zip:1.9'
     compile 'com.github.BoD:jraf-android-util:-SNAPSHOT'
+    compile 'org.zeroturnaround:zt-zip:1.9'
+    compile "commons-io:commons-io:+" // TODO We should probably not depend on that
 
     // Bundle the wear app inside this one
     wearApp project(':wear')
