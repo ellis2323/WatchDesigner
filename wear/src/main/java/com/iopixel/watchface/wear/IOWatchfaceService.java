@@ -4,8 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.opengl.GLES20;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -13,7 +11,6 @@ import android.support.annotation.Nullable;
 import android.support.wearable.watchface.Gles2WatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
@@ -35,8 +32,10 @@ import com.google.devrel.wcl.WearManager;
 import com.google.devrel.wcl.callbacks.AbstractWearConsumer;
 import com.iopixel.library.I18NEngine;
 import com.iopixel.library.Native;
+import com.iopixel.library.Storage;
 
 import org.jraf.android.util.log.LogUtil;
+import org.jraf.android.util.log.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,37 +47,9 @@ import java.util.TimeZone;
  */
 public class IOWatchfaceService extends Gles2WatchFaceService {
 
-    public static final String TAG = "iopixel";
     public static final boolean DEBUG = true;
     public static Engine sEngine;
 
-    public void logInfo(String message) {
-        if (DEBUG) {
-            Log.i(TAG, message);
-        }
-    }
-
-    public String getAPKFileName() {
-        try {
-            ApplicationInfo appInfo = getPackageManager().getApplicationInfo(getPackageName(), 0);
-            return appInfo.sourceDir;
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "Error when locating the apk filename");
-        }
-        return "";
-    }
-
-    public String getInternalStoragePath() {
-        Context ctx = getApplicationContext();
-        if (ctx.getFilesDir() == null) {
-            Log.e(TAG, "error, getFilesDir is null");
-        }
-
-        if (!ctx.getFilesDir().exists()) {
-            ctx.getFilesDir().mkdir();
-        }
-        return ctx.getFilesDir().getAbsolutePath();
-    }
 
     @Override
     public Engine onCreateEngine() {
@@ -88,12 +59,15 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
             @Override
             public void onWearableFileReceivedResult(int statusCode, String requestId, File savedFile, String originalName) {
                 String statusCodeStr = LogUtil.getConstantName(WearableStatusCodes.class, statusCode);
-                org.jraf.android.util.log.Log.d("statusCode=%s requestId=%s savedFile=%s originalName=%s", statusCodeStr, requestId, savedFile, originalName);
-                org.jraf.android.util.log.Log.d("File size=%d", savedFile.length());
+                Log.d("statusCode=%s requestId=%s savedFile=%s originalName=%s", statusCodeStr, requestId, savedFile, originalName);
+                Log.d("File size=%d", savedFile.length());
                 try {
                     Native.LoadGWD(savedFile.getCanonicalPath());
                 } catch (IOException e) {
                     Native.LoadGWD(savedFile.getAbsolutePath());
+                }
+                if (sEngine != null) {
+                    sEngine.invalidate();
                 }
             }
         });
@@ -120,7 +94,6 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
 
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
-            logInfo("onCreate");
             super.onCreate(surfaceHolder);
 
             mStepsRequested = false;
@@ -149,7 +122,7 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
 
         @Override
         public void onDestroy() {
-            logInfo("onDestroy");
+            Log.d("onDestroy");
             Native.Destroy();
         }
 
@@ -161,7 +134,7 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
         @Override
         public void onGlSurfaceCreated(int width, int height) {
             super.onGlSurfaceCreated(width, height);
-            Native.OnSurfaceCreated(getAPKFileName(), getInternalStoragePath(), width, height);
+            Native.OnSurfaceCreated(Storage.getAPKFileName(IOWatchfaceService.this), Storage.getInternalStoragePath(IOWatchfaceService.this), width, height);
         }
 
         @Override
@@ -245,7 +218,7 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
         public void onTapCommand(@TapType int tapType, int x, int y, long eventTime) {
             switch (tapType) {
                 case WatchFaceService.TAP_TYPE_TAP:
-                    logInfo("tap " + x + " " + y);
+                    Log.d("tap " + x + " " + y);
                     Native.SendEvent(x, y);
                     break;
 
@@ -262,9 +235,7 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
         }
 
         private void getTotalSteps() {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "getTotalSteps()");
-            }
+            Log.d("getTotalSteps()");
 
             if ((mGoogleApiClient != null)
                     && (mGoogleApiClient.isConnected())
@@ -288,12 +259,12 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
                         public void onResult(Status status) {
                             if (status.isSuccess()) {
                                 if (status.getStatusCode() == FitnessStatusCodes.SUCCESS_ALREADY_SUBSCRIBED) {
-                                    Log.i(TAG, "Existing subscription for activity detected.");
+                                    Log.i("Existing subscription for activity detected.");
                                 } else {
-                                    Log.i(TAG, "Successfully subscribed!");
+                                    Log.i("Successfully subscribed!");
                                 }
                             } else {
-                                Log.i(TAG, "There was a problem subscribing.");
+                                Log.i( "There was a problem subscribing.");
                             }
                         }
                     });
@@ -321,7 +292,7 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
                 List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();;
                 if (!points.isEmpty()) {
                     mStepsTotal = points.get(0).getValue(Field.FIELD_STEPS).asInt();
-                    Log.d(TAG, "steps updated: " + mStepsTotal);
+                    Log.d("steps updated: %d", mStepsTotal);
                 }
             }
         }
