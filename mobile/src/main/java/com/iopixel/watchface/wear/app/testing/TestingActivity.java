@@ -15,26 +15,36 @@
  */
 package com.iopixel.watchface.wear.app.testing;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
+import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import org.apache.commons.io.FileUtils;
 import org.jraf.android.util.io.IoUtil;
 import org.jraf.android.util.log.Log;
 import org.jraf.android.util.log.LogUtil;
+import org.zeroturnaround.zip.ZipUtil;
 
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.WearableStatusCodes;
 import com.google.devrel.wcl.WearManager;
 import com.google.devrel.wcl.connectivity.WearFileTransfer;
+import com.iopixel.library.Native;
+import com.iopixel.library.Storage;
 import com.iopixel.watchface.wear.R;
 
 public class TestingActivity extends AppCompatActivity {
@@ -47,9 +57,21 @@ public class TestingActivity extends AppCompatActivity {
         btnSendAFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendAFile("text1.gwd");
+                sendAFile("text.gwd");
             }
         });
+/*
+        Native.InitWithNullDriver(Storage.getAPKFileName(this), Storage.getInternalStoragePath(this));
+
+        try {
+            UnzipAssets("nyan.gwd", "toto");
+            File outputDir = getOutputDir("toto");
+            Native.CreateWD(outputDir.getAbsolutePath());
+            deletePngInDirectory(outputDir);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+*/
     }
 
     private void sendAFile(String fileName) {
@@ -57,7 +79,13 @@ public class TestingActivity extends AppCompatActivity {
         assert file != null;
         Set<Node> connectedNodes = WearManager.getInstance().getConnectedNodes();
         Log.d("connectedNodes=%s", connectedNodes);
-        Node firstNode = connectedNodes.iterator().next();
+        Node node = null;
+        for (Node n : connectedNodes) {
+            if (n.isNearby()) {
+                node = n;
+            }
+        }
+        Node firstNode = node;
         WearFileTransfer wearFileTransfer = new WearFileTransfer.Builder(firstNode).setTargetName(fileName).setFile(file).setOnFileTransferResultListener(
                 new WearFileTransfer.OnFileTransferRequestListener() {
                     @Override
@@ -89,5 +117,92 @@ public class TestingActivity extends AppCompatActivity {
             IoUtil.closeSilently(in, out);
         }
         return file;
+    }
+
+    private boolean UnzipAssets(String filepath, String dirName) throws IOException {
+        File outputDir = getOutputDir(dirName);
+        FileUtils.deleteDirectory(outputDir);
+        outputDir.mkdir();
+        // create spritesheets
+        File sps = new File(outputDir.getAbsolutePath() + File.separator + "spritesheets");
+        sps.mkdir();
+        //FileInputStream is = new FileInputStream(filepath);
+        InputStream is = getAssets().open(filepath);
+        unpackZip(is, outputDir.getAbsolutePath());
+        //ZipUtil.unpack(is, outputDir);
+        return true;
+    }
+
+    private File getOutputDir(String dirName) {
+        String basepath = getFilesDir().getAbsolutePath();
+        String dirpath = basepath + File.separator + dirName;
+        return new File(dirpath);
+    }
+
+    private void deleteDirectory(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++) {
+                new File(dir, children[i]).delete();
+            }
+        }
+    }
+
+    private void deletePngInDirectory(File dir) {
+        String[] exts = { "png" };
+        Iterator it = FileUtils.iterateFiles(dir, exts, true);
+        while (it.hasNext()) {
+            File file = (File) it.next();
+            if (file != null) {
+                file.delete();
+            }
+        }
+    }
+
+    private boolean unpackZip(InputStream is, String path)
+    {
+        ZipInputStream zis;
+        try
+        {
+            String filename;
+            zis = new ZipInputStream(new BufferedInputStream(is));
+            ZipEntry ze;
+            byte[] buffer = new byte[1024];
+            int count;
+
+            while ((ze = zis.getNextEntry()) != null)
+            {
+                // zapis do souboru
+                filename = ze.getName();
+
+                // Need to create directories if not exists, or
+                // it will generate an Exception...
+                if (ze.isDirectory()) {
+                    File fmd = new File(path + filename);
+                    fmd.mkdirs();
+                    continue;
+                }
+
+                FileOutputStream fout = new FileOutputStream(path + filename);
+
+                // cteni zipu a zapis
+                while ((count = zis.read(buffer)) != -1)
+                {
+                    fout.write(buffer, 0, count);
+                }
+
+                fout.close();
+                zis.closeEntry();
+            }
+
+            zis.close();
+        }
+        catch(IOException e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
     }
 }

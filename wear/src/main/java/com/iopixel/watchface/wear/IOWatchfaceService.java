@@ -30,9 +30,16 @@ import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.fitness.result.DailyTotalResult;
 
+import com.google.android.gms.wearable.WearableStatusCodes;
+import com.google.devrel.wcl.WearManager;
+import com.google.devrel.wcl.callbacks.AbstractWearConsumer;
 import com.iopixel.library.I18NEngine;
 import com.iopixel.library.Native;
 
+import org.jraf.android.util.log.LogUtil;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -75,6 +82,21 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
 
     @Override
     public Engine onCreateEngine() {
+        // init WCL
+        WearManager.initialize(this);
+        WearManager.getInstance().addWearConsumer(new AbstractWearConsumer() {
+            @Override
+            public void onWearableFileReceivedResult(int statusCode, String requestId, File savedFile, String originalName) {
+                String statusCodeStr = LogUtil.getConstantName(WearableStatusCodes.class, statusCode);
+                org.jraf.android.util.log.Log.d("statusCode=%s requestId=%s savedFile=%s originalName=%s", statusCodeStr, requestId, savedFile, originalName);
+                org.jraf.android.util.log.Log.d("File size=%d", savedFile.length());
+                try {
+                    Native.LoadGWD(savedFile.getCanonicalPath());
+                } catch (IOException e) {
+                    Native.LoadGWD(savedFile.getAbsolutePath());
+                }
+            }
+        });
         sEngine = new Engine();
         return sEngine;
     }

@@ -29,6 +29,9 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import com.iopixel.library.Native;
+import com.iopixel.library.Storage;
+
 import org.apache.commons.io.FileUtils;
 import org.zeroturnaround.zip.ZipUtil;
 
@@ -52,11 +55,12 @@ public class WatchFaceConfigActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        nativeCreate(getAPKFileName(), getInternalStoragePath());
+        Native.InitWithNullDriver(Storage.getAPKFileName(this), Storage.getInternalStoragePath(this));
 
         try {
             UnzipAssets("data/text.gwd", "toto");
             File outputDir = getOutputDir("toto");
+            Native.CreateWD(outputDir.getAbsolutePath());
             deletePngInDirectory(outputDir);
         } catch (IOException e) {
             e.printStackTrace();
@@ -145,33 +149,6 @@ public class WatchFaceConfigActivity extends Activity {
 
     }
 
-    public String getAPKFileName() {
-        try {
-            ApplicationInfo appInfo = getPackageManager().getApplicationInfo(getPackageName(), 0);
-            return appInfo.sourceDir;
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "Error when locating the apk filename");
-        }
-        return "";
-    }
 
-    public String getInternalStoragePath() {
-        Context ctx = getApplicationContext();
-        if (ctx.getFilesDir() == null) {
-            Log.e(TAG, "error, getFilesDir is null");
-        }
-
-        if (!ctx.getFilesDir().exists()) {
-            ctx.getFilesDir().mkdir();
-        }
-        return ctx.getFilesDir().getAbsolutePath();
-    }
-
-    // JNI
-    static {
-        System.loadLibrary("watchface");
-    }
-
-    public static native void nativeCreate(String apkPath, String pwdPath);
 
 }

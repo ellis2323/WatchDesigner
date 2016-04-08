@@ -30,6 +30,8 @@ public class Native {
     // common
 
     // mobile
+    public static native void InitWithNullDriver(String apkPath, String pwdPath);
+    public static native void CreateWD(String path);
 
     // wear
     public static native void Destroy();
@@ -39,5 +41,6 @@ public class Native {
     public static native void SendEvent(int x, int y);
     public static native void AmbientMode(boolean mode);
     public static native void VisibilityChanged(boolean visibility);
+    public static native void LoadGWD(String path);
 
 }
