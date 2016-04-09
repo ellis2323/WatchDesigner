@@ -17,7 +17,6 @@ package com.iopixel.watchface.wear.app.testing;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,7 +26,6 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -37,14 +35,11 @@ import org.apache.commons.io.FileUtils;
 import org.jraf.android.util.io.IoUtil;
 import org.jraf.android.util.log.Log;
 import org.jraf.android.util.log.LogUtil;
-import org.zeroturnaround.zip.ZipUtil;
 
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.WearableStatusCodes;
 import com.google.devrel.wcl.WearManager;
 import com.google.devrel.wcl.connectivity.WearFileTransfer;
-import com.iopixel.library.Native;
-import com.iopixel.library.Storage;
 import com.iopixel.watchface.wear.R;
 
 public class TestingActivity extends AppCompatActivity {
@@ -79,13 +74,13 @@ public class TestingActivity extends AppCompatActivity {
         assert file != null;
         Set<Node> connectedNodes = WearManager.getInstance().getConnectedNodes();
         Log.d("connectedNodes=%s", connectedNodes);
-        Node node = null;
+        Node firstNode = null;
         for (Node n : connectedNodes) {
             if (n.isNearby()) {
-                node = n;
+                firstNode = n;
+                break;
             }
         }
-        Node firstNode = node;
         WearFileTransfer wearFileTransfer = new WearFileTransfer.Builder(firstNode).setTargetName(fileName).setFile(file).setOnFileTransferResultListener(
                 new WearFileTransfer.OnFileTransferRequestListener() {
                     @Override
