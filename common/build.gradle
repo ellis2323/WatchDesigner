@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '23.0.2'
+    buildToolsVersion "${project.buildToolsVersion}"
 
     defaultConfig {
         minSdkVersion 18
@@ -34,4 +34,7 @@ dependencies {
 
     // Wear companion library
     compile project(':WearCompanionLibrary:WCL')
+
+    // Other libs
+    compile 'com.github.BoD:jraf-android-util:-SNAPSHOT'
 }

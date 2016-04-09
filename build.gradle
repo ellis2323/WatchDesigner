@@ -51,5 +51,6 @@ buildNumberProperties.load(new FileInputStream(buildNumberFile))
 ext.buildNumber = buildNumberProperties['build.number'].toInteger()
 
 // Versions used across modules
+ext.buildToolsVersion = '23.0.3'
 ext.supportLibVersion = '23.3.0'
 ext.playServicesVersion = '8.4.0'
