@@ -40,6 +40,7 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.WearableStatusCodes;
 import com.google.devrel.wcl.WearManager;
 import com.google.devrel.wcl.connectivity.WearFileTransfer;
+import com.iopixel.library.Storage;
 import com.iopixel.watchface.wear.R;
 
 public class TestingActivity extends AppCompatActivity {
@@ -52,7 +53,7 @@ public class TestingActivity extends AppCompatActivity {
         btnSendAFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendAFile("text.gwd");
+                sendAFile();
             }
         });
 /*
@@ -69,8 +70,8 @@ public class TestingActivity extends AppCompatActivity {
 */
     }
 
-    private void sendAFile(String fileName) {
-        File file = getFile(fileName);
+    private void sendAFile() {
+        File file = getFirstFile();
         assert file != null;
         Set<Node> connectedNodes = WearManager.getInstance().getConnectedNodes();
         Log.d("connectedNodes=%s", connectedNodes);
@@ -81,7 +82,7 @@ public class TestingActivity extends AppCompatActivity {
                 break;
             }
         }
-        WearFileTransfer wearFileTransfer = new WearFileTransfer.Builder(firstNode).setTargetName(fileName).setFile(file).setOnFileTransferResultListener(
+        WearFileTransfer wearFileTransfer = new WearFileTransfer.Builder(firstNode).setTargetName(file.getName()).setFile(file).setOnFileTransferResultListener(
                 new WearFileTransfer.OnFileTransferRequestListener() {
                     @Override
                     public void onFileTransferStatusResult(int statusCode) {
@@ -90,6 +91,12 @@ public class TestingActivity extends AppCompatActivity {
                 }).build();
 
         wearFileTransfer.startTransfer();
+    }
+
+    @Nullable
+    private File getFirstFile() {
+        File gwdStorage = Storage.getGwdStorage(this);
+        return gwdStorage.listFiles()[0];
     }
 
     @Nullable
@@ -144,7 +151,7 @@ public class TestingActivity extends AppCompatActivity {
     }
 
     private void deletePngInDirectory(File dir) {
-        String[] exts = { "png" };
+        String[] exts = {"png"};
         Iterator it = FileUtils.iterateFiles(dir, exts, true);
         while (it.hasNext()) {
             File file = (File) it.next();
@@ -154,19 +161,16 @@ public class TestingActivity extends AppCompatActivity {
         }
     }
 
-    private boolean unpackZip(InputStream is, String path)
-    {
+    private boolean unpackZip(InputStream is, String path) {
         ZipInputStream zis;
-        try
-        {
+        try {
             String filename;
             zis = new ZipInputStream(new BufferedInputStream(is));
             ZipEntry ze;
             byte[] buffer = new byte[1024];
             int count;
 
-            while ((ze = zis.getNextEntry()) != null)
-            {
+            while ((ze = zis.getNextEntry()) != null) {
                 // zapis do souboru
                 filename = ze.getName();
 
@@ -181,8 +185,7 @@ public class TestingActivity extends AppCompatActivity {
                 FileOutputStream fout = new FileOutputStream(path + filename);
 
                 // cteni zipu a zapis
-                while ((count = zis.read(buffer)) != -1)
-                {
+                while ((count = zis.read(buffer)) != -1) {
                     fout.write(buffer, 0, count);
                 }
 
@@ -191,9 +194,7 @@ public class TestingActivity extends AppCompatActivity {
             }
 
             zis.close();
-        }
-        catch(IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
             return false;
         }

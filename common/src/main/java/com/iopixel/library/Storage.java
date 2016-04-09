@@ -15,42 +15,48 @@
  */
 package com.iopixel.library;
 
+import java.io.File;
+
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.res.AssetManager;
-import android.util.Log;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Iterator;
+import org.jraf.android.util.log.Log;
 
 /**
  * Created by ellis on 30/03/16.
  */
 public class Storage {
-
-    public static final String TAG = "iopixel";
+    private static final String PATH_GWD = "gwd";
 
     public static String getAPKFileName(Context ctx) {
         try {
             ApplicationInfo appInfo = ctx.getPackageManager().getApplicationInfo(ctx.getPackageName(), 0);
             return appInfo.sourceDir;
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "Error when locating the apk filename");
+            Log.e(e, "Error when locating the apk filename");
         }
         return "";
     }
 
     public static String getInternalStoragePath(Context ctx) {
         if (ctx.getFilesDir() == null) {
-            Log.e(TAG, "error, getFilesDir is null");
+            Log.e("error, getFilesDir is null");
         }
 
         if (!ctx.getFilesDir().exists()) {
             ctx.getFilesDir().mkdir();
         }
         return ctx.getFilesDir().getAbsolutePath();
+    }
+
+    public static File getGwdStorage(Context ctx) {
+        File gwdStorage = ctx.getExternalFilesDir(PATH_GWD);
+        return gwdStorage;
+    }
+
+    public static File getGwdStorage(Context ctx, String fileName) {
+        File gwdStorage = getGwdStorage(ctx);
+        return new File(gwdStorage, fileName);
     }
 }
