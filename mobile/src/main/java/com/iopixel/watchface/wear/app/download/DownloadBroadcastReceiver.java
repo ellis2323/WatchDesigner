@@ -34,6 +34,7 @@ import org.jraf.android.util.log.LogUtil;
 
 import com.iopixel.library.Storage;
 import com.iopixel.watchface.wear.R;
+import com.iopixel.watchface.wear.app.testing.TestingActivity;
 
 public class DownloadBroadcastReceiver extends BroadcastReceiver {
     @Override
@@ -87,6 +88,7 @@ public class DownloadBroadcastReceiver extends BroadcastReceiver {
 
     private void onSuccess(Context context, String downloadedFilePath) {
         Log.d("downloadedFilePath=%s", downloadedFilePath);
+        // Copy the downloaded file to the storage
         File downloadedFile = new File(downloadedFilePath);
         String fileName = downloadedFile.getName();
         File destination = Storage.getGwdStorage(context, fileName);
@@ -98,6 +100,11 @@ public class DownloadBroadcastReceiver extends BroadcastReceiver {
             showToast(context, toastText);
             return;
         }
+
+        // Send the file to the watch
+        TestingActivity.sendAFile(destination);
+
+        // Success toast
         String toastText = context.getString(R.string.download_successToast, fileName);
         showToast(context, toastText);
     }

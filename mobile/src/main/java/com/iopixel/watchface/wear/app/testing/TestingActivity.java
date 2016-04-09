@@ -53,7 +53,7 @@ public class TestingActivity extends AppCompatActivity {
         btnSendAFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendAFile();
+                sendAFile(getFirstFile());
             }
         });
 /*
@@ -70,9 +70,7 @@ public class TestingActivity extends AppCompatActivity {
 */
     }
 
-    private void sendAFile() {
-        File file = getFirstFile();
-        assert file != null;
+    public static void sendAFile(File file) {
         Set<Node> connectedNodes = WearManager.getInstance().getConnectedNodes();
         Log.d("connectedNodes=%s", connectedNodes);
         Node firstNode = null;
@@ -81,6 +79,10 @@ public class TestingActivity extends AppCompatActivity {
                 firstNode = n;
                 break;
             }
+        }
+        if (firstNode == null) {
+            Log.d("Could not find any nearby nodes: give up");
+            return;
         }
         WearFileTransfer wearFileTransfer = new WearFileTransfer.Builder(firstNode).setTargetName(file.getName()).setFile(file).setOnFileTransferResultListener(
                 new WearFileTransfer.OnFileTransferRequestListener() {
