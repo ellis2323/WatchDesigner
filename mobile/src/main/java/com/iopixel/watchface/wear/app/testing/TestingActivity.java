@@ -21,7 +21,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -31,7 +30,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
-import org.apache.commons.io.FileUtils;
 import org.jraf.android.util.io.IoUtil;
 import org.jraf.android.util.log.Log;
 import org.jraf.android.util.log.LogUtil;
@@ -123,6 +121,7 @@ public class TestingActivity extends AppCompatActivity {
         return file;
     }
 
+    /*
     private boolean UnzipAssets(String filepath, String dirName) throws IOException {
         File outputDir = getOutputDir(dirName);
         FileUtils.deleteDirectory(outputDir);
@@ -136,6 +135,7 @@ public class TestingActivity extends AppCompatActivity {
         //ZipUtil.unpack(is, outputDir);
         return true;
     }
+    */
 
     private File getOutputDir(String dirName) {
         String basepath = getFilesDir().getAbsolutePath();
@@ -152,6 +152,7 @@ public class TestingActivity extends AppCompatActivity {
         }
     }
 
+    /*
     private void deletePngInDirectory(File dir) {
         String[] exts = {"png"};
         Iterator it = FileUtils.iterateFiles(dir, exts, true);
@@ -162,6 +163,7 @@ public class TestingActivity extends AppCompatActivity {
             }
         }
     }
+    */
 
     private boolean unpackZip(InputStream is, String path) {
         ZipInputStream zis;
