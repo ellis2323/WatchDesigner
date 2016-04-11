@@ -35,6 +35,7 @@ import org.jraf.android.util.log.LogUtil;
 import com.iopixel.library.Storage;
 import com.iopixel.watchface.wear.R;
 import com.iopixel.watchface.wear.app.testing.TestingActivity;
+import com.iopixel.watchface.wear.library.GWDReader;
 
 public class DownloadBroadcastReceiver extends BroadcastReceiver {
     @Override
@@ -100,6 +101,8 @@ public class DownloadBroadcastReceiver extends BroadcastReceiver {
             showToast(context, toastText);
             return;
         }
+        // Read the GWD file to extract icon
+        GWDReader reader = new GWDReader(destination);
 
         // Send the file to the watch
         TestingActivity.sendAFile(destination);
