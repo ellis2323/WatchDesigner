@@ -61,7 +61,7 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
         mCursor.moveToPosition(position);
         holder.binding.setCursor(mCursor);
         // We must execute the bindings now, otherwise they will be deferred to later,
-        // and the the cursor position will have changed.
+        // and the cursor position will have changed.
         holder.binding.executePendingBindings();
     }
 
