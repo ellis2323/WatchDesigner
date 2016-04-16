@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * imitations under the License.
  */
 package com.iopixel.watchface.wear.backend.provider;
 
@@ -40,11 +40,11 @@ public class WatchDesignerSQLiteOpenHelper extends SQLiteOpenHelper {
     public static final String SQL_CREATE_TABLE_WATCHFACE = "CREATE TABLE IF NOT EXISTS "
             + WatchfaceColumns.TABLE_NAME + " ( "
             + WatchfaceColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + WatchfaceColumns.ID + " TEXT NOT NULL, "
+            + WatchfaceColumns.PUBLIC_ID + " TEXT NOT NULL, "
             + WatchfaceColumns.DISPLAY_NAME + " TEXT NOT NULL, "
             + WatchfaceColumns.IS_SELECTED + " INTEGER NOT NULL DEFAULT 0, "
             + WatchfaceColumns.INSTALL_DATE + " INTEGER NOT NULL "
-            + ", CONSTRAINT unique_id UNIQUE (id) ON CONFLICT REPLACE"
+            + ", CONSTRAINT unique_public_id UNIQUE (public_id) ON CONFLICT REPLACE"
             + " );";
 
     // @formatter:on

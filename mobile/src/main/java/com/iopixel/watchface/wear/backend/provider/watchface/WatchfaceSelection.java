@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * imitations under the License.
  */
 package com.iopixel.watchface.wear.backend.provider.watchface;
 
@@ -93,43 +93,43 @@ public class WatchfaceSelection extends AbstractSelection<WatchfaceSelection> {
         return orderById(false);
     }
 
-    public WatchfaceSelection id(String... value) {
-        addEquals(WatchfaceColumns.ID, value);
+    public WatchfaceSelection publicId(String... value) {
+        addEquals(WatchfaceColumns.PUBLIC_ID, value);
         return this;
     }
 
-    public WatchfaceSelection idNot(String... value) {
-        addNotEquals(WatchfaceColumns.ID, value);
+    public WatchfaceSelection publicIdNot(String... value) {
+        addNotEquals(WatchfaceColumns.PUBLIC_ID, value);
         return this;
     }
 
-    public WatchfaceSelection idLike(String... value) {
-        addLike(WatchfaceColumns.ID, value);
+    public WatchfaceSelection publicIdLike(String... value) {
+        addLike(WatchfaceColumns.PUBLIC_ID, value);
         return this;
     }
 
-    public WatchfaceSelection idContains(String... value) {
-        addContains(WatchfaceColumns.ID, value);
+    public WatchfaceSelection publicIdContains(String... value) {
+        addContains(WatchfaceColumns.PUBLIC_ID, value);
         return this;
     }
 
-    public WatchfaceSelection idStartsWith(String... value) {
-        addStartsWith(WatchfaceColumns.ID, value);
+    public WatchfaceSelection publicIdStartsWith(String... value) {
+        addStartsWith(WatchfaceColumns.PUBLIC_ID, value);
         return this;
     }
 
-    public WatchfaceSelection idEndsWith(String... value) {
-        addEndsWith(WatchfaceColumns.ID, value);
+    public WatchfaceSelection publicIdEndsWith(String... value) {
+        addEndsWith(WatchfaceColumns.PUBLIC_ID, value);
         return this;
     }
 
-    public WatchfaceSelection orderById(boolean desc) {
-        orderBy(WatchfaceColumns.ID, desc);
+    public WatchfaceSelection orderByPublicId(boolean desc) {
+        orderBy(WatchfaceColumns.PUBLIC_ID, desc);
         return this;
     }
 
-    public WatchfaceSelection orderById() {
-        orderBy(WatchfaceColumns.ID, false);
+    public WatchfaceSelection orderByPublicId() {
+        orderBy(WatchfaceColumns.PUBLIC_ID, false);
         return this;
     }
 

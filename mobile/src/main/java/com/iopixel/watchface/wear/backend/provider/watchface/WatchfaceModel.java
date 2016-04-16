@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * imitations under the License.
  */
 package com.iopixel.watchface.wear.backend.provider.watchface;
 
@@ -27,11 +27,11 @@ import com.iopixel.watchface.wear.backend.provider.base.BaseModel;
 public interface WatchfaceModel extends BaseModel {
 
     /**
-     * Id of the watchface, which is used to build file names (e.g. "xyw_superwf_v2").
+     * Public id of the watchface, which is used to build file names (e.g. "xyw_superwf_v2").
      * Cannot be {@code null}.
      */
     @NonNull
-    String getId();
+    String getPublicId();
 
     /**
      * Display name (e.g. "Super Duper Watchface v2").

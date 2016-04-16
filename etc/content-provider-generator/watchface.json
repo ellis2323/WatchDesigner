@@ -3,8 +3,8 @@
 
   "fields": [
     {
-      "documentation": "Id of the watchface, which is used to build file names (e.g. \"xyw_superwf_v2\").",
-      "name": "id",
+      "documentation": "Public id of the watchface, which is used to build file names (e.g. \"xyw_superwf_v2\").",
+      "name": "public_id",
       "type": "String",
       "nullable": false
     },
@@ -31,8 +31,8 @@
 
   "constraints": [
     {
-      "name": "unique_id",
-      "definition": "UNIQUE (id) ON CONFLICT REPLACE"
+      "name": "unique_public_id",
+      "definition": "UNIQUE (public_id) ON CONFLICT REPLACE"
     }
   ]
 }

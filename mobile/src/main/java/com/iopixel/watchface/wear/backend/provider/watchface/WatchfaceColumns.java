@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * imitations under the License.
  */
 package com.iopixel.watchface.wear.backend.provider.watchface;
 
@@ -33,9 +33,9 @@ public class WatchfaceColumns implements BaseColumns {
     public static final String _ID = BaseColumns._ID;
 
     /**
-     * Id of the watchface, which is used to build file names (e.g. "xyw_superwf_v2").
+     * Public id of the watchface, which is used to build file names (e.g. "xyw_superwf_v2").
      */
-    public static final String ID = "id";
+    public static final String PUBLIC_ID = "public_id";
 
     /**
      * Display name (e.g. "Super Duper Watchface v2").
@@ -58,7 +58,7 @@ public class WatchfaceColumns implements BaseColumns {
     // @formatter:off
     public static final String[] ALL_COLUMNS = new String[] {
             _ID,
-            ID,
+            PUBLIC_ID,
             DISPLAY_NAME,
             IS_SELECTED,
             INSTALL_DATE
@@ -68,7 +68,7 @@ public class WatchfaceColumns implements BaseColumns {
     public static boolean hasColumns(String[] projection) {
         if (projection == null) return true;
         for (String c : projection) {
-            if (c.equals(ID) || c.contains("." + ID)) return true;
+            if (c.equals(PUBLIC_ID) || c.contains("." + PUBLIC_ID)) return true;
             if (c.equals(DISPLAY_NAME) || c.contains("." + DISPLAY_NAME)) return true;
             if (c.equals(IS_SELECTED) || c.contains("." + IS_SELECTED)) return true;
             if (c.equals(INSTALL_DATE) || c.contains("." + INSTALL_DATE)) return true;

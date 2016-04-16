@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * imitations under the License.
  */
 package com.iopixel.watchface.wear.backend.provider.watchface;
 
@@ -41,14 +41,14 @@ public class WatchfaceCursor extends AbstractCursor implements WatchfaceModel {
     }
 
     /**
-     * Id of the watchface, which is used to build file names (e.g. "xyw_superwf_v2").
+     * Public id of the watchface, which is used to build file names (e.g. "xyw_superwf_v2").
      * Cannot be {@code null}.
      */
     @NonNull
-    public String getId() {
-        String res = getStringOrNull(WatchfaceColumns.ID);
+    public String getPublicId() {
+        String res = getStringOrNull(WatchfaceColumns.PUBLIC_ID);
         if (res == null)
-            throw new NullPointerException("The value of 'id' in the database was null, which is not allowed according to the model definition");
+            throw new NullPointerException("The value of 'public_id' in the database was null, which is not allowed according to the model definition");
         return res;
     }
 

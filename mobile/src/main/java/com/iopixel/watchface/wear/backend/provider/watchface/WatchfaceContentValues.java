@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * imitations under the License.
  */
 package com.iopixel.watchface.wear.backend.provider.watchface;
 
@@ -55,11 +55,11 @@ public class WatchfaceContentValues extends AbstractContentValues {
     }
 
     /**
-     * Id of the watchface, which is used to build file names (e.g. "xyw_superwf_v2").
+     * Public id of the watchface, which is used to build file names (e.g. "xyw_superwf_v2").
      */
-    public WatchfaceContentValues putId(@NonNull String value) {
-        if (value == null) throw new IllegalArgumentException("id must not be null");
-        mContentValues.put(WatchfaceColumns.ID, value);
+    public WatchfaceContentValues putPublicId(@NonNull String value) {
+        if (value == null) throw new IllegalArgumentException("publicId must not be null");
+        mContentValues.put(WatchfaceColumns.PUBLIC_ID, value);
         return this;
     }
 
