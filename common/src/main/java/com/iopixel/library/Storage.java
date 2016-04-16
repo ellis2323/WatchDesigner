@@ -23,9 +23,6 @@ import android.content.pm.PackageManager;
 
 import org.jraf.android.util.log.Log;
 
-/**
- * Created by ellis on 30/03/16.
- */
 public class Storage {
     private static final String PATH_GWD = "gwd";
 
@@ -59,4 +56,9 @@ public class Storage {
         File gwdStorage = getGwdStorage(ctx);
         return new File(gwdStorage, fileName);
     }
+
+    public static File getPreviewImage(Context ctx, String publicId) {
+        return getGwdStorage(ctx, publicId + ".png");
+    }
+
 }

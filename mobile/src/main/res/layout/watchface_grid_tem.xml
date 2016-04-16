@@ -15,6 +15,7 @@
   limitations under the License.
   -->
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -26,33 +27,44 @@
             type="WatchfaceCursor" />
     </data>
 
-    <android.support.v7.widget.CardView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:paddingBottom="8dp"
+        android:paddingTop="8dp">
 
-        <LinearLayout
+        <android.support.v7.widget.CardView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:padding="8dp">
+            android:layout_gravity="center"
+            app:cardElevation="4dp">
 
-            <ImageView
-                android:id="@+id/imgPreview"
-                android:layout_width="@dimen/watchface_grid_item_preview_width"
-                android:layout_height="@dimen/watchface_grid_item_preview_width"
-                tools:background="#888" />
-
-            <TextView
-                android:id="@+id/txtName"
-                android:layout_width="@dimen/watchface_grid_item_preview_width"
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center"
-                android:lines="2"
-                android:text="@{cursor.displayName}"
-                tools:text="Super Cool Looking Watchface" />
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:padding="8dp">
 
-        </LinearLayout>
-    </android.support.v7.widget.CardView>
+                <ImageView
+                    android:id="@+id/imgPreview"
+                    android:layout_width="@dimen/watchface_grid_item_preview_width"
+                    android:layout_height="@dimen/watchface_grid_item_preview_width"
+                    app:iconFile="@{cursor.publicId}"
+                    tools:background="#888" />
+
+                <TextView
+                    android:id="@+id/txtName"
+                    android:layout_width="@dimen/watchface_grid_item_preview_width"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:lines="2"
+                    android:text="@{cursor.displayName}"
+                    tools:text="Super Cool Looking Watchface" />
+
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+    </FrameLayout>
 </layout>

@@ -44,7 +44,7 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.watchface_grid, container, false);
         mBinding.rclGrid.setHasFixedSize(true);
-        mLayoutManager = new GridLayoutManager(getContext(), 3);
+        mLayoutManager = new GridLayoutManager(getContext(), 2);
         mBinding.rclGrid.setLayoutManager(mLayoutManager);
         return mBinding.getRoot();
     }
