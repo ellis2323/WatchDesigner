@@ -21,7 +21,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -32,14 +31,10 @@ import android.view.View;
 
 import org.jraf.android.util.io.IoUtil;
 import org.jraf.android.util.log.Log;
-import org.jraf.android.util.log.LogUtil;
 
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.WearableStatusCodes;
-import com.google.devrel.wcl.WearManager;
-import com.google.devrel.wcl.connectivity.WearFileTransfer;
 import com.iopixel.library.Storage;
 import com.iopixel.watchface.wear.R;
+import com.iopixel.watchface.wear.library.WearUtil;
 
 public class TestingActivity extends AppCompatActivity {
     @Override
@@ -51,7 +46,7 @@ public class TestingActivity extends AppCompatActivity {
         btnSendAFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendAFile(getFirstFile());
+                WearUtil.sendAFile(getFirstFile());
             }
         });
 /*
@@ -66,31 +61,6 @@ public class TestingActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 */
-    }
-
-    public static void sendAFile(File file) {
-        Set<Node> connectedNodes = WearManager.getInstance().getConnectedNodes();
-        Log.d("connectedNodes=%s", connectedNodes);
-        Node firstNode = null;
-        for (Node n : connectedNodes) {
-            if (n.isNearby()) {
-                firstNode = n;
-                break;
-            }
-        }
-        if (firstNode == null) {
-            Log.d("Could not find any nearby nodes: give up");
-            return;
-        }
-        WearFileTransfer wearFileTransfer = new WearFileTransfer.Builder(firstNode).setTargetName(file.getName()).setFile(file).setOnFileTransferResultListener(
-                new WearFileTransfer.OnFileTransferRequestListener() {
-                    @Override
-                    public void onFileTransferStatusResult(int statusCode) {
-                        Log.d("statusCode=%s", LogUtil.getConstantName(WearableStatusCodes.class, statusCode));
-                    }
-                }).build();
-
-        wearFileTransfer.startTransfer();
     }
 
     @Nullable

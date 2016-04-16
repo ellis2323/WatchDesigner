@@ -33,10 +33,10 @@ import org.jraf.android.util.log.LogUtil;
 
 import com.iopixel.library.Storage;
 import com.iopixel.watchface.wear.R;
-import com.iopixel.watchface.wear.app.testing.TestingActivity;
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceContentValues;
 import com.iopixel.watchface.wear.library.FileUtil;
 import com.iopixel.watchface.wear.library.GWDReader;
+import com.iopixel.watchface.wear.library.WearUtil;
 
 public class DownloadBroadcastReceiver extends BroadcastReceiver {
     @Override
@@ -115,7 +115,7 @@ public class DownloadBroadcastReceiver extends BroadcastReceiver {
         insert(context, destination, watchfaceName);
 
         // Send the file to the watch
-        TestingActivity.sendAFile(destination);
+        WearUtil.sendAFile(destination);
 
         // Success toast
         String toastText = context.getString(R.string.download_successToast, fileName);
@@ -131,9 +131,9 @@ public class DownloadBroadcastReceiver extends BroadcastReceiver {
         // Now insert the new watchface
         values.putDisplayName(watchfaceName);
         String id = FileUtil.removeExtension(gwdFile);
-        values.putId(id);
+        values.putPublicId(id);
         values.putInstallDate(System.currentTimeMillis());
-        values.putIsSelected(false);
+        values.putIsSelected(true);
         values.insert(context);
     }
 
