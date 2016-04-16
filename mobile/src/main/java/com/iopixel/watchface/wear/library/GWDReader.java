@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 ellis
+ * Copyright (C) 2016 The WatchDesigner team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,7 @@
  */
 package com.iopixel.watchface.wear.library;
 
-import android.content.Context;
-
-import org.jraf.android.util.file.FileUtil;
-import org.jraf.android.util.io.IoUtil;
-import org.jraf.android.util.log.Log;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -42,11 +29,14 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-/**
- * Created by ellis on 11/04/16.
- */
-public class GWDReader {
+import org.jraf.android.util.io.IoUtil;
+import org.jraf.android.util.log.Log;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+public class GWDReader {
     // buffer of 4096 bytes
     private static final int BUFFER_SIZE = 4096;
 

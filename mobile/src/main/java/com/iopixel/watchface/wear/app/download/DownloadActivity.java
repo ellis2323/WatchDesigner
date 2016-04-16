@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Benoit 'BoD' Lubek (BoD@JRAF.org)
+ * Copyright (C) 2016 The WatchDesigner team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ public class DownloadActivity extends Activity {
         if (fileName == null) {
             // Handle special case for gearfaces.com
             if (uri.toString().contains("wpdmdl")) {
+                // Use a generic file name, because we don't have a real one
                 fileName = "watchface.gwd";
             } else {
                 // This is not a download link: silently ignore
@@ -46,7 +47,7 @@ public class DownloadActivity extends Activity {
 
         DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
         DownloadManager.Request request = new DownloadManager.Request(uri);
-        request.setDescription(getString(R.string.app_name));
+        request.setTitle(getString(R.string.app_name));
         request.setDescription(getString(R.string.download_description, fileName));
         request.setVisibleInDownloadsUi(false);
         downloadManager.enqueue(request);

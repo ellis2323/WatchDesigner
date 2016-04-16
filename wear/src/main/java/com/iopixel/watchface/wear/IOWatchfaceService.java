@@ -1,4 +1,23 @@
+/*
+ * Copyright (C) 2016 The WatchDesigner team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.iopixel.watchface.wear;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -15,6 +34,9 @@ import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
+import org.jraf.android.util.log.Log;
+import org.jraf.android.util.log.LogUtil;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -26,21 +48,12 @@ import com.google.android.gms.fitness.data.DataPoint;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.fitness.result.DailyTotalResult;
-
 import com.google.android.gms.wearable.WearableStatusCodes;
 import com.google.devrel.wcl.WearManager;
 import com.google.devrel.wcl.callbacks.AbstractWearConsumer;
 import com.iopixel.library.I18NEngine;
 import com.iopixel.library.Native;
 import com.iopixel.library.Storage;
-
-import org.jraf.android.util.log.LogUtil;
-import org.jraf.android.util.log.Log;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.TimeZone;
 
 /**
  * Created by ellis on 13/02/16.
