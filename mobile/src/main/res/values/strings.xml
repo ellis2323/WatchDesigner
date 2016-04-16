@@ -20,5 +20,6 @@
     <string name="download_startedToast">Watchface %s download started…</string>
     <string name="download_failToast_install">Could not install %s</string>
     <string name="download_failToast_download">Could not download %s. Please try again.</string>
+    <string name="download_failToast_extract">Could not install %s. Please try again.</string>
     <string name="download_successToast">Watchface %s successfully installed</string>
 </resources>

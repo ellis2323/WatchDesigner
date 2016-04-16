@@ -20,82 +20,74 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringReader;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+
+import android.support.annotation.Nullable;
+import android.support.annotation.WorkerThread;
 
 import org.jraf.android.util.io.IoUtil;
 import org.jraf.android.util.log.Log;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 public class GWDReader {
     // buffer of 4096 bytes
     private static final int BUFFER_SIZE = 4096;
 
-    public GWDReader(File gwdFile) {
-        loadGWD(gwdFile);
-    }
-
-    protected static boolean loadGWD(File gwdFile) {
+    /**
+     * Extract the icon and returns the watchface name.
+     *
+     * @param gwdFile Gwd file to read.
+     * @return The name of the watchface as declared in its manifest, or {@code null} if a problem occurred while extracting or parsing.
+     */
+    @WorkerThread
+    @Nullable
+    public static String loadGWD(File gwdFile) {
+        String gwdName = "unknown";
+        ZipInputStream zis = null;
         try {
-            InputStream is = new FileInputStream(gwdFile);
-            ZipInputStream zis = new ZipInputStream(is);
-            String gwdName = "unknown";
-            try {
-                ZipEntry ze;
-                while ((ze = zis.getNextEntry()) != null) {
-                    // search watchface.xml
-                    if (ze != null) {
-                        if (ze.getName().equals("res/watchface.xml")) {
-                            // parse XML
-                            String content = IoUtil.readFully(zis);
-                            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                            DocumentBuilder builder = factory.newDocumentBuilder();
-                            Document dom = builder.parse(new InputSource(new StringReader(content)));
-                            Element element = (Element)dom.getDocumentElement();
-                            if (element != null) {
-                                // search <watchface name="WHAT_I_WANT">
-                                gwdName = element.getAttribute("name");
-                                Log.i("name: %s", gwdName);
-                            }
-                        } else if (ze.getName().startsWith("shared/res/") && ze.getName().endsWith(".png")) {
-                            String iconName = removeExtension(gwdFile.getName()) + ".png";
-                            // icon name
-                            Log.i("icon: ||%s||", iconName);
-                            String iconPath = gwdFile.getParent() + File.separator + iconName;
-                            // write into file with filename_of_gwd.png (we removed the .gwd)
-                            extractFile(zis, iconPath);
-                        } else {
-                            //Log.i("other name: ||%s||", ze.getName());
-                        }
+            zis = new ZipInputStream(new FileInputStream(gwdFile));
+            ZipEntry ze;
+            while ((ze = zis.getNextEntry()) != null) {
+                // search watchface.xml
+                if (ze.getName().equals("res/watchface.xml")) {
+                    // parse XML
+                    String content = IoUtil.readFully(zis);
+                    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                    DocumentBuilder builder = factory.newDocumentBuilder();
+                    Document dom = builder.parse(new InputSource(new StringReader(content)));
+                    Element element = dom.getDocumentElement();
+                    if (element != null) {
+                        // search <watchface name="WHAT_I_WANT">
+                        gwdName = element.getAttribute("name");
+                        Log.i("name: %s", gwdName);
                     }
+                } else if (ze.getName().startsWith("shared/res/") && ze.getName().endsWith(".png")) {
+                    String iconName = FileUtil.removeExtension(gwdFile) + ".png";
+                    // icon name
+                    Log.i("icon: ||%s||", iconName);
+                    File iconPath = new File(gwdFile.getParent(), iconName);
+                    // write into file with filename_of_gwd.png (we removed the .gwd)
+                    extractFile(zis, iconPath);
                 }
-            } finally {
-                zis.close();
             }
-        } catch (ParserConfigurationException e) {
-            Log.e("ParserConfigurationException: %s", e.getLocalizedMessage());
-            return false;
-        } catch (SAXException e) {
-            Log.e("SAXException: %s", e.getLocalizedMessage());
-            return false;
-        } catch (IOException e) {
-            Log.e("IOException: %s", e.getLocalizedMessage());
-            return false;
+        } catch (Exception e) {
+            Log.e(e, "Could not extract icon, or read or parse watchface.xml");
+            return null;
+        } finally {
+            IoUtil.closeSilently(zis);
         }
-        return true;
+        return gwdName;
     }
 
-    protected static void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
-        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
+    private static void extractFile(ZipInputStream zipIn, File file) throws IOException {
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
         byte[] bytesIn = new byte[BUFFER_SIZE];
         int read = 0;
         while ((read = zipIn.read(bytesIn)) != -1) {
@@ -103,25 +95,4 @@ public class GWDReader {
         }
         bos.close();
     }
-
-
-    protected static String removeExtension(String s) {
-        String filename;
-
-        // Remove the path upto the filename.
-        int lastSeparatorIndex = s.lastIndexOf(File.separator);
-        if (lastSeparatorIndex == -1) {
-            filename = s;
-        } else {
-            filename = s.substring(lastSeparatorIndex + 1);
-        }
-
-        // Remove the extension.
-        int extensionIndex = filename.lastIndexOf(".");
-        if (extensionIndex == -1)
-            return filename;
-
-        return filename.substring(0, extensionIndex);
-    }
-
 }

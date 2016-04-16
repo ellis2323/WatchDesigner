@@ -1,0 +1,13 @@
+{
+  "syntaxVersion": 3,
+  "projectPackageId": "com.iopixel.watchface.wear",
+  "authority": "com.iopixel.watchface.wear.backend.provider",
+  "providerJavaPackage": "com.iopixel.watchface.wear.backend.provider",
+  "providerClassName": "WatchDesignerProvider",
+  "sqliteOpenHelperClassName": "WatchDesignerSQLiteOpenHelper",
+  "sqliteOpenHelperCallbacksClassName": "WatchDesignerSQLiteOpenHelperCallbacks",
+  "databaseFileName": "watchdesigner.db",
+  "databaseVersion": 1,
+  "enableForeignKeys": true,
+  "useAnnotations": true
+}

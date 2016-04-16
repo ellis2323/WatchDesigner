@@ -1,0 +1,38 @@
+{
+  "documentation": "Watchface.",
+
+  "fields": [
+    {
+      "documentation": "Id of the watchface, which is used to build file names (e.g. \"xyw_superwf_v2\").",
+      "name": "id",
+      "type": "String",
+      "nullable": false
+    },
+    {
+      "documentation": "Display name (e.g. \"Super Duper Watchface v2\").",
+      "name": "display_name",
+      "type": "String",
+      "nullable": false
+    },
+    {
+      "documentation": "Is it the currently selected watchface?<br/>At any time, the value should be {@code true} for one and only one row.",
+      "name": "is_selected",
+      "type": "Boolean",
+      "nullable": false,
+      "defaultValue": "false"
+    },
+    {
+      "documentation": "When was the watchface installed.",
+      "name": "install_date",
+      "type": "Date",
+      "nullable": false
+    }
+  ],
+
+  "constraints": [
+    {
+      "name": "unique_id",
+      "definition": "UNIQUE (id) ON CONFLICT REPLACE"
+    }
+  ]
+}

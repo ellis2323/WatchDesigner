@@ -27,7 +27,6 @@ import android.os.AsyncTask;
 import android.support.annotation.WorkerThread;
 import android.widget.Toast;
 
-import org.jraf.android.util.file.FileUtil;
 import org.jraf.android.util.handler.HandlerUtil;
 import org.jraf.android.util.log.Log;
 import org.jraf.android.util.log.LogUtil;
@@ -35,6 +34,8 @@ import org.jraf.android.util.log.LogUtil;
 import com.iopixel.library.Storage;
 import com.iopixel.watchface.wear.R;
 import com.iopixel.watchface.wear.app.testing.TestingActivity;
+import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceContentValues;
+import com.iopixel.watchface.wear.library.FileUtil;
 import com.iopixel.watchface.wear.library.GWDReader;
 
 public class DownloadBroadcastReceiver extends BroadcastReceiver {
@@ -65,15 +66,15 @@ public class DownloadBroadcastReceiver extends BroadcastReceiver {
             cursor.moveToFirst();
             int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
             Log.d("status=%s", LogUtil.getConstantName(DownloadManager.class, status, "STATUS"));
+            String description = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_DESCRIPTION));
             switch (status) {
                 case DownloadManager.STATUS_FAILED:
-                    String description = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_DESCRIPTION));
                     onFail(context, description);
                     break;
 
                 case DownloadManager.STATUS_SUCCESSFUL:
                     String downloadedFilePath = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME));
-                    onSuccess(context, downloadedFilePath);
+                    onSuccess(context, description, downloadedFilePath);
                     break;
             }
         } finally {
@@ -87,22 +88,31 @@ public class DownloadBroadcastReceiver extends BroadcastReceiver {
         showToast(context, toastText);
     }
 
-    private void onSuccess(Context context, String downloadedFilePath) {
+    private void onSuccess(Context context, String description, String downloadedFilePath) {
         Log.d("downloadedFilePath=%s", downloadedFilePath);
         // Copy the downloaded file to the storage
         File downloadedFile = new File(downloadedFilePath);
         String fileName = downloadedFile.getName();
         File destination = Storage.getGwdStorage(context, fileName);
         try {
-            FileUtil.copy(downloadedFile, destination);
+            org.jraf.android.util.file.FileUtil.copy(downloadedFile, destination);
         } catch (IOException e) {
             Log.w(e, "Could not copy file");
             String toastText = context.getString(R.string.download_failToast_install, fileName);
             showToast(context, toastText);
             return;
         }
-        // Read the GWD file to extract icon
-        GWDReader reader = new GWDReader(destination);
+        // Extract icon and return watchface name
+        String watchfaceName = GWDReader.loadGWD(destination);
+        if (watchfaceName == null) {
+            Log.w("Could not extract the icon: give up");
+            String toastText = context.getString(R.string.download_failToast_extract, description);
+            showToast(context, toastText);
+            return;
+        }
+
+        // Insert into content provider
+        insert(context, destination, watchfaceName);
 
         // Send the file to the watch
         TestingActivity.sendAFile(destination);
@@ -110,6 +120,21 @@ public class DownloadBroadcastReceiver extends BroadcastReceiver {
         // Success toast
         String toastText = context.getString(R.string.download_successToast, fileName);
         showToast(context, toastText);
+    }
+
+    private void insert(Context context, File gwdFile, String watchfaceName) {
+        // First, deselect any previously selected watchface
+        WatchfaceContentValues values = new WatchfaceContentValues();
+        values.putIsSelected(false);
+        values.update(context, null);
+
+        // Now insert the new watchface
+        values.putDisplayName(watchfaceName);
+        String id = FileUtil.removeExtension(gwdFile);
+        values.putId(id);
+        values.putInstallDate(System.currentTimeMillis());
+        values.putIsSelected(false);
+        values.insert(context);
     }
 
     private void showToast(final Context context, final String toastText) {
