@@ -18,4 +18,8 @@
     <color name="primary">#F00</color>
     <color name="primary_dark">#D00</color>
     <color name="accent">#0FF</color>
+
+    <color name="watchface_grid_item_selected">#FFF</color>
+    <color name="watchface_grid_item_normal">#EEE</color>
+
 </resources>

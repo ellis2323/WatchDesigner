@@ -16,4 +16,8 @@
   -->
 <resources>
     <dimen name="watchface_grid_item_preview_width">128dp</dimen>
+    <dimen name="watchface_grid_item_padding">8dp</dimen>
+    <dimen name="watchface_grid_item_inter_padding">16dp</dimen>
+    <dimen name="watchface_grid_item_elevation_selected">8dp</dimen>
+    <dimen name="watchface_grid_item_elevation_normal">2dp</dimen>
 </resources>

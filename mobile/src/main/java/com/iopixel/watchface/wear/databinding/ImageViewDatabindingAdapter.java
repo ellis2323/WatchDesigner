@@ -21,12 +21,13 @@ import android.databinding.BindingAdapter;
 import android.widget.ImageView;
 
 import com.iopixel.library.Storage;
+import com.iopixel.watchface.wear.R;
 import com.squareup.picasso.Picasso;
 
 public class ImageViewDatabindingAdapter {
     @BindingAdapter("bind:iconFile")
     public static void loadImage(ImageView view, String publicId) {
         File previewFile = Storage.getPreviewImage(view.getContext(), publicId);
-        Picasso.with(view.getContext()).load(previewFile).into(view);
+        Picasso.with(view.getContext()).load(previewFile).placeholder(R.drawable.preview_placeholder).into(view);
     }
 }

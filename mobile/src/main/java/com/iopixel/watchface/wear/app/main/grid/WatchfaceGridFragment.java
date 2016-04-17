@@ -15,14 +15,17 @@
  */
 package com.iopixel.watchface.wear.app.main.grid;
 
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,8 +47,46 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.watchface_grid, container, false);
         mBinding.rclGrid.setHasFixedSize(true);
-        mLayoutManager = new GridLayoutManager(getContext(), 2);
+        mLayoutManager = new GridLayoutManager(getContext(), 1);
         mBinding.rclGrid.setLayoutManager(mLayoutManager);
+
+        // Calculate the optimal column count based on the width of the grid, and the width of one cell
+        mBinding.rclGrid.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                Resources resources = v.getContext().getResources();
+                int cellWidth = resources.getDimensionPixelSize(R.dimen.watchface_grid_item_preview_width) +
+                        resources.getDimensionPixelSize(R.dimen.watchface_grid_item_padding) * 2;
+                // We also want some minimum padding between cells
+                int interPadding = resources.getDimensionPixelSize(R.dimen.watchface_grid_item_inter_padding);
+                cellWidth += interPadding;
+                int gridWidth = right - left;
+                gridWidth -= interPadding;
+                int columnCount = gridWidth / cellWidth;
+                mLayoutManager.setSpanCount(columnCount);
+
+                // Relayout everything since we changed the number of columns
+                if (mAdapter != null) mAdapter.notifyDataSetChanged();
+
+                // We're done
+                mBinding.rclGrid.removeOnLayoutChangeListener(this);
+            }
+        });
+
+        // Add some padding on top of the items on the first line, so they're all equally spaced
+        mBinding.rclGrid.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+                int position = parent.getChildAdapterPosition(view);
+                int columnCount = mLayoutManager.getSpanCount();
+                if (position < columnCount) {
+                    Resources resources = view.getContext().getResources();
+                    int interPadding = resources.getDimensionPixelSize(R.dimen.watchface_grid_item_inter_padding);
+                    outRect.set(0, interPadding, 0, 0);
+                }
+            }
+        });
+
         return mBinding.getRoot();
     }
 
