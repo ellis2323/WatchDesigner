@@ -47,18 +47,21 @@ public class Storage {
         return ctx.getFilesDir().getAbsolutePath();
     }
 
-    public static File getGwdStorage(Context ctx) {
+    public static File getGwdStorageFile(Context ctx) {
         File gwdStorage = ctx.getExternalFilesDir(PATH_GWD);
         return gwdStorage;
     }
 
-    public static File getGwdStorage(Context ctx, String fileName) {
-        File gwdStorage = getGwdStorage(ctx);
+    public static File getGwdStorageFile(Context ctx, String fileName) {
+        File gwdStorage = getGwdStorageFile(ctx);
         return new File(gwdStorage, fileName);
     }
 
-    public static File getPreviewImage(Context ctx, String publicId) {
-        return getGwdStorage(ctx, publicId + ".png");
+    public static File getPreviewImageFile(Context ctx, String publicId) {
+        return getGwdStorageFile(ctx, publicId + ".png");
     }
 
+    public static File getGwdFile(Context ctx, String publicId) {
+        return getGwdStorageFile(ctx, publicId + ".gwd");
+    }
 }

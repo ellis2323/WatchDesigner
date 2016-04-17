@@ -21,6 +21,7 @@ import android.databinding.DataBindingUtil;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.iopixel.watchface.wear.R;
@@ -39,12 +40,14 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
     }
 
     private final Context mContext;
+    private final WatchfaceCallbacks mCallbacks;
     private final LayoutInflater mLayoutInflater;
     @Nullable
     private WatchfaceCursor mCursor;
 
     public WatchfaceGridAdapter(Context context, WatchfaceCallbacks callbacks) {
         mContext = context;
+        mCallbacks = callbacks;
         mLayoutInflater = LayoutInflater.from(mContext);
         setHasStableIds(true);
     }
@@ -63,6 +66,8 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
         // We must execute the bindings now, otherwise they will be deferred to later,
         // and the cursor position will have changed.
         holder.binding.executePendingBindings();
+        holder.binding.conCard.setTag(position);
+        holder.binding.conCard.setOnClickListener(mOnClickListener);
     }
 
     @Override
@@ -82,4 +87,14 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
         mCursor = cursor == null ? null : new WatchfaceCursor(cursor);
         notifyDataSetChanged();
     }
+
+    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            int position = (int) v.getTag();
+            assert mCursor != null;
+            mCursor.moveToPosition(position);
+            mCallbacks.onWatchfaceClicked(mCursor.getPublicId());
+        }
+    };
 }

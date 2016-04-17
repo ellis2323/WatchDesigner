@@ -65,7 +65,7 @@ public class TestingActivity extends AppCompatActivity {
 
     @Nullable
     private File getFirstFile() {
-        File gwdStorage = Storage.getGwdStorage(this);
+        File gwdStorage = Storage.getGwdStorageFile(this);
         return gwdStorage.listFiles()[0];
     }
 

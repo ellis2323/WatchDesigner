@@ -27,7 +27,7 @@ import com.squareup.picasso.Picasso;
 public class ImageViewDatabindingAdapter {
     @BindingAdapter("bind:iconFile")
     public static void loadImage(ImageView view, String publicId) {
-        File previewFile = Storage.getPreviewImage(view.getContext(), publicId);
+        File previewFile = Storage.getPreviewImageFile(view.getContext(), publicId);
         Picasso.with(view.getContext()).load(previewFile).placeholder(R.drawable.preview_placeholder).into(view);
     }
 }

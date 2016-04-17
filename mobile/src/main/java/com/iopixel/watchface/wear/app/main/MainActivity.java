@@ -15,12 +15,20 @@
  */
 package com.iopixel.watchface.wear.app.main;
 
+import java.io.File;
+
 import android.databinding.DataBindingUtil;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
 
+import com.iopixel.library.Storage;
 import com.iopixel.watchface.wear.R;
+import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceContentValues;
+import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceSelection;
 import com.iopixel.watchface.wear.databinding.MainBinding;
+import com.iopixel.watchface.wear.library.WearUtil;
 
 public class MainActivity extends AppCompatActivity implements WatchfaceCallbacks {
     private MainBinding mBinding;
@@ -30,4 +38,39 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.main);
     }
+
+    /*
+     * WatchfaceCallbacks.
+     */
+    //region
+
+    @Override
+    public void onWatchfaceClicked(final String publicId) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                // First, deselect any previously selected watchface
+                WatchfaceContentValues values = new WatchfaceContentValues();
+                values.putIsSelected(false);
+                values.update(MainActivity.this, null);
+
+                // Now select the given one
+                WatchfaceSelection selection = new WatchfaceSelection().publicId(publicId);
+                values.putIsSelected(true);
+                values.update(MainActivity.this, selection);
+
+                // Send the watchface to the watch
+                File gwdFile = Storage.getGwdFile(MainActivity.this, publicId);
+                WearUtil.sendAFile(gwdFile);
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void result) {
+                Toast.makeText(MainActivity.this, R.string.main_watchfaceSetToast, Toast.LENGTH_LONG).show();
+            }
+        }.execute();
+    }
+
+    //endregion
 }

@@ -58,7 +58,7 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
                 int cellWidth = resources.getDimensionPixelSize(R.dimen.watchface_grid_item_preview_width) +
                         resources.getDimensionPixelSize(R.dimen.watchface_grid_item_padding) * 2;
                 // We also want some minimum padding between cells
-                int interPadding = resources.getDimensionPixelSize(R.dimen.watchface_grid_item_inter_padding);
+                int interPadding = resources.getDimensionPixelSize(R.dimen.watchface_grid_item_inter_padding_horizontal);
                 cellWidth += interPadding;
                 int gridWidth = right - left;
                 gridWidth -= interPadding;
@@ -73,16 +73,22 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
             }
         });
 
-        // Add some padding on top of the items on the first line, so they're all equally spaced
+        // Add some top padding on the items on the first line,
+        // and some bottom padding on the items of the last line,
+        // so they're all equally spaced.
         mBinding.rclGrid.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
             public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
                 int position = parent.getChildAdapterPosition(view);
+                int size = mAdapter.getItemCount();
                 int columnCount = mLayoutManager.getSpanCount();
+                Resources resources = view.getContext().getResources();
                 if (position < columnCount) {
-                    Resources resources = view.getContext().getResources();
-                    int interPadding = resources.getDimensionPixelSize(R.dimen.watchface_grid_item_inter_padding);
-                    outRect.set(0, interPadding, 0, 0);
+                    // First line
+                    outRect.set(0, resources.getDimensionPixelSize(R.dimen.watchface_grid_item_inter_padding_bottom), 0, 0);
+                } else if (position > size - columnCount) {
+                    // Last line
+                    outRect.set(0, 0, 0, resources.getDimensionPixelSize(R.dimen.watchface_grid_item_inter_padding_top));
                 }
             }
         });

@@ -23,4 +23,5 @@
     <string name="download_failToast_extract">Could not install %s. Please try again.</string>
     <string name="download_successToast">Watchface %s successfully installed</string>
     <string name="main_watchface_empty">No watchfaces</string>
+    <string name="main_watchfaceSetToast">Watchface set</string>
 </resources>

@@ -31,12 +31,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
-        android:paddingBottom="@dimen/watchface_grid_item_inter_padding">
+        android:paddingBottom="@dimen/watchface_grid_item_inter_padding_bottom"
+        android:paddingTop="@dimen/watchface_grid_item_inter_padding_top">
 
         <android.support.v7.widget.CardView
+            android:id="@+id/conCard"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:foreground="?android:selectableItemBackground"
             app:cardElevation="@{cursor.isSelected?@dimen/watchface_grid_item_elevation_selected:@dimen/watchface_grid_item_elevation_normal}">
 
             <LinearLayout

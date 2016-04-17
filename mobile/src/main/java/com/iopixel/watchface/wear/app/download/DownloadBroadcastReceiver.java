@@ -93,7 +93,7 @@ public class DownloadBroadcastReceiver extends BroadcastReceiver {
         // Copy the downloaded file to the storage
         File downloadedFile = new File(downloadedFilePath);
         String fileName = downloadedFile.getName();
-        File destination = Storage.getGwdStorage(context, fileName);
+        File destination = Storage.getGwdStorageFile(context, fileName);
         try {
             org.jraf.android.util.file.FileUtil.copy(downloadedFile, destination);
         } catch (IOException e) {

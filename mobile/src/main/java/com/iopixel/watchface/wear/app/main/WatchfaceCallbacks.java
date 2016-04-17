@@ -16,4 +16,5 @@
 package com.iopixel.watchface.wear.app.main;
 
 public interface WatchfaceCallbacks {
+    void onWatchfaceClicked(String publicId);
 }
