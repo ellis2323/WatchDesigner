@@ -17,6 +17,7 @@ package com.iopixel.watchface.wear;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import android.content.BroadcastReceiver;
@@ -48,12 +49,14 @@ import com.google.android.gms.fitness.data.DataPoint;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.fitness.result.DailyTotalResult;
+import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableStatusCodes;
 import com.google.devrel.wcl.WearManager;
 import com.google.devrel.wcl.callbacks.AbstractWearConsumer;
 import com.iopixel.library.I18NEngine;
 import com.iopixel.library.Native;
 import com.iopixel.library.Storage;
+import com.iopixel.library.Wear;
 
 /**
  * Created by ellis on 13/02/16.
@@ -63,29 +66,64 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
     public static final boolean DEBUG = true;
     public static Engine sEngine;
 
+    private AbstractWearConsumer mWearConsumer = new AbstractWearConsumer() {
+        @Override
+        public void onWearableFileReceivedResult(int statusCode, String requestId, File savedFile, String originalName) {
+            String statusCodeStr = LogUtil.getConstantName(WearableStatusCodes.class, statusCode);
+            Log.d("statusCode=%s requestId=%s savedFile=%s originalName=%s", statusCodeStr, requestId, savedFile, originalName);
+            Log.d("File size=%d", savedFile.length());
+            try {
+                Native.LoadGWD(savedFile.getCanonicalPath());
+            } catch (IOException e) {
+                Native.LoadGWD(savedFile.getAbsolutePath());
+            }
+            if (sEngine != null) {
+                sEngine.invalidate();
+            }
+        }
+
+        @Override
+        public void onWearableMessageReceived(MessageEvent messageEvent) {
+            String path = messageEvent.getPath();
+            Log.d("path=%s", path);
+            switch (path) {
+                case Wear.PATH_MESSAGE_SET_GWD_REQUEST:
+                    String publicId = null;
+                    try {
+                        publicId = new String(messageEvent.getData(), "utf-8");
+                    } catch (UnsupportedEncodingException ignored) {}
+                    assert publicId != null;
+                    Log.d("publicId=%s", publicId);
+                    File gwdFile = Storage.getInternalGwdFile(IOWatchfaceService.this, publicId);
+                    if (gwdFile.exists()) {
+                        // We already have the gwd file
+                        Log.d("gwd exists");
+                        // Load it now
+                        Native.LoadGWD(gwdFile.getAbsolutePath());
+
+                        // Reply OK
+                        WearManager.getInstance().sendMessage(messageEvent.getSourceNodeId(), Wear.PATH_MESSAGE_SET_GWD_REPLY, Wear.DATA_OK);
+                    } else {
+                        // We don't have it: ask for the transfer
+                        Log.d("gwd doesn't exist");
+                        WearManager.getInstance().sendMessage(messageEvent.getSourceNodeId(), Wear.PATH_MESSAGE_SET_GWD_REPLY, Wear.DATA_KO);
+                    }
+                    break;
+            }
+        }
+    };
 
     @Override
     public Engine onCreateEngine() {
-        // init WCL
-        WearManager.initialize(this);
-        WearManager.getInstance().addWearConsumer(new AbstractWearConsumer() {
-            @Override
-            public void onWearableFileReceivedResult(int statusCode, String requestId, File savedFile, String originalName) {
-                String statusCodeStr = LogUtil.getConstantName(WearableStatusCodes.class, statusCode);
-                Log.d("statusCode=%s requestId=%s savedFile=%s originalName=%s", statusCodeStr, requestId, savedFile, originalName);
-                Log.d("File size=%d", savedFile.length());
-                try {
-                    Native.LoadGWD(savedFile.getCanonicalPath());
-                } catch (IOException e) {
-                    Native.LoadGWD(savedFile.getAbsolutePath());
-                }
-                if (sEngine != null) {
-                    sEngine.invalidate();
-                }
-            }
-        });
+        WearManager.getInstance().addWearConsumer(mWearConsumer);
         sEngine = new Engine();
         return sEngine;
+    }
+
+    @Override
+    public void onDestroy() {
+        WearManager.getInstance().removeWearConsumer(mWearConsumer);
+        super.onDestroy();
     }
 
     private class Engine extends Gles2WatchFaceService.Engine implements
@@ -206,10 +244,9 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
         @Override
         public void onApplyWindowInsets(WindowInsets insets) {
             super.onApplyWindowInsets(insets);
-            if(insets.isRound()){
+            if (insets.isRound()) {
                 Native.Shape(1);
-            }
-            else{
+            } else {
                 Native.Shape(0);
             }
 
@@ -277,7 +314,7 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
                                     Log.i("Successfully subscribed!");
                                 }
                             } else {
-                                Log.i( "There was a problem subscribing.");
+                                Log.i("There was a problem subscribing.");
                             }
                         }
                     });
@@ -302,7 +339,8 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
         public void onResult(@NonNull DailyTotalResult dailyTotalResult) {
             mStepsRequested = false;
             if (dailyTotalResult.getStatus().isSuccess()) {
-                List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();;
+                List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
+                ;
                 if (!points.isEmpty()) {
                     mStepsTotal = points.get(0).getValue(Field.FIELD_STEPS).asInt();
                     Log.d("steps updated: %d", mStepsTotal);

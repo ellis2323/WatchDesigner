@@ -64,4 +64,8 @@ public class Storage {
     public static File getGwdFile(Context ctx, String publicId) {
         return getGwdStorageFile(ctx, publicId + ".gwd");
     }
+
+    public static File getInternalGwdFile(Context ctx, String publicId) {
+        return new File(ctx.getFilesDir(), publicId + ".gwd");
+    }
 }

@@ -33,8 +33,8 @@ import org.jraf.android.util.io.IoUtil;
 import org.jraf.android.util.log.Log;
 
 import com.iopixel.library.Storage;
+import com.iopixel.library.Wear;
 import com.iopixel.watchface.wear.R;
-import com.iopixel.watchface.wear.library.WearUtil;
 
 public class TestingActivity extends AppCompatActivity {
     @Override
@@ -46,7 +46,7 @@ public class TestingActivity extends AppCompatActivity {
         btnSendAFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                WearUtil.sendAFile(getFirstFile());
+                Wear.sendAFile(getFirstFile());
             }
         });
 /*

@@ -23,29 +23,63 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
+import org.jraf.android.util.log.Log;
+
+import com.google.android.gms.wearable.MessageEvent;
+import com.google.devrel.wcl.WearManager;
+import com.google.devrel.wcl.callbacks.AbstractWearConsumer;
 import com.iopixel.library.Storage;
+import com.iopixel.library.Wear;
 import com.iopixel.watchface.wear.R;
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceContentValues;
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceSelection;
 import com.iopixel.watchface.wear.databinding.MainBinding;
-import com.iopixel.watchface.wear.library.WearUtil;
 
 public class MainActivity extends AppCompatActivity implements WatchfaceCallbacks {
     private MainBinding mBinding;
+    private String mGwdToSendPublicId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.main);
+        WearManager.getInstance().addWearConsumer(mWearConsumer);
     }
 
-    /*
-     * WatchfaceCallbacks.
-     */
-    //region
+    @Override
+    protected void onDestroy() {
+        WearManager.getInstance().removeWearConsumer(mWearConsumer);
+        super.onDestroy();
+    }
+
+    private AbstractWearConsumer mWearConsumer = new AbstractWearConsumer() {
+        @Override
+        public void onWearableMessageReceived(MessageEvent messageEvent) {
+            String path = messageEvent.getPath();
+            Log.d("path=%s", path);
+            switch (path) {
+                case Wear.PATH_MESSAGE_SET_GWD_REPLY:
+                    boolean ok = Wear.isOk(messageEvent);
+                    if (!ok) {
+                        // File not present: send it now
+                        File gwdFile = Storage.getGwdFile(MainActivity.this, mGwdToSendPublicId);
+                        Wear.sendAFile(gwdFile);
+                    }
+
+                    Toast.makeText(MainActivity.this, R.string.main_watchfaceSetToast, Toast.LENGTH_LONG).show();
+                    break;
+            }
+        }
+    };
+
+
+    //
+    //region WatchfaceCallbacks.
+    //
 
     @Override
-    public void onWatchfaceClicked(final String publicId) {
+    public void onWatchfaceClicked(String publicId) {
+        mGwdToSendPublicId = publicId;
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
@@ -55,19 +89,13 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
                 values.update(MainActivity.this, null);
 
                 // Now select the given one
-                WatchfaceSelection selection = new WatchfaceSelection().publicId(publicId);
+                WatchfaceSelection selection = new WatchfaceSelection().publicId(mGwdToSendPublicId);
                 values.putIsSelected(true);
                 values.update(MainActivity.this, selection);
 
-                // Send the watchface to the watch
-                File gwdFile = Storage.getGwdFile(MainActivity.this, publicId);
-                WearUtil.sendAFile(gwdFile);
+                // Ask the watch to set the watchface
+                Wear.sendMessage(Wear.PATH_MESSAGE_SET_GWD_REQUEST, mGwdToSendPublicId);
                 return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void result) {
-                Toast.makeText(MainActivity.this, R.string.main_watchfaceSetToast, Toast.LENGTH_LONG).show();
             }
         }.execute();
     }

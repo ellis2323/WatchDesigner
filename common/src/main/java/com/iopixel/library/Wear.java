@@ -13,21 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.iopixel.watchface.wear.library;
+package com.iopixel.library;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Set;
+
+import android.support.annotation.Nullable;
 
 import org.jraf.android.util.log.Log;
 import org.jraf.android.util.log.LogUtil;
 
+import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.WearableStatusCodes;
 import com.google.devrel.wcl.WearManager;
 import com.google.devrel.wcl.connectivity.WearFileTransfer;
 
-public class WearUtil {
-    public static void sendAFile(File file) {
+public class Wear {
+    private static final String PATH_MESSAGE_PREFIX = "message/";
+    private static final String PATH_MESSAGE_SUFFIX_REQUEST = "/req";
+    private static final String PATH_MESSAGE_SUFFIX_REPLY = "/repl";
+
+    public static final String PATH_MESSAGE_SET_GWD_REQUEST = PATH_MESSAGE_PREFIX + "setGwd" + PATH_MESSAGE_SUFFIX_REQUEST;
+    public static final String PATH_MESSAGE_SET_GWD_REPLY = PATH_MESSAGE_PREFIX + "setGwd" + PATH_MESSAGE_SUFFIX_REPLY;
+
+    public static final byte[] DATA_OK = {0};
+    public static final byte[] DATA_KO = {1};
+
+    public static boolean isOk(MessageEvent messageEvent) {
+        return Arrays.equals(DATA_OK, messageEvent.getData());
+    }
+
+    @Nullable
+    private static Node getFirstNode() {
         Set<Node> connectedNodes = WearManager.getInstance().getConnectedNodes();
         Log.d("connectedNodes=%s", connectedNodes);
         Node firstNode = null;
@@ -37,6 +57,11 @@ public class WearUtil {
                 break;
             }
         }
+        return firstNode;
+    }
+
+    public static void sendAFile(File file) {
+        Node firstNode = getFirstNode();
         if (firstNode == null) {
             Log.d("Could not find any nearby nodes: give up");
             return;
@@ -51,4 +76,18 @@ public class WearUtil {
 
         wearFileTransfer.startTransfer();
     }
+
+    public static void sendMessage(String path, String data) {
+        Node firstNode = getFirstNode();
+        if (firstNode == null) {
+            Log.d("Could not find any nearby nodes: give up");
+            return;
+        }
+        byte[] dataBytes = new byte[0];
+        try {
+            dataBytes = data.getBytes("utf-8");
+        } catch (UnsupportedEncodingException ignored) {}
+        WearManager.getInstance().sendMessage(firstNode.getId(), path, dataBytes);
+    }
+
 }
