@@ -24,7 +24,10 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rclGrid"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="@{@dimen/watchface_grid_item_inter_padding / 2}"
+            android:paddingTop="@{@dimen/watchface_grid_item_inter_padding / 2}" />
 
         <TextView
             android:id="@+id/conEmpty"

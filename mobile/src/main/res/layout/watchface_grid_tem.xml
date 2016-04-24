@@ -31,8 +31,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
-        android:paddingBottom="@dimen/watchface_grid_item_inter_padding_bottom"
-        android:paddingTop="@dimen/watchface_grid_item_inter_padding_top">
+        android:paddingBottom="@{@dimen/watchface_grid_item_inter_padding / 2}"
+        android:paddingTop="@{@dimen/watchface_grid_item_inter_padding / 2}">
 
         <android.support.v7.widget.CardView
             android:id="@+id/conCard"
