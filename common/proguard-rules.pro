@@ -9,4 +9,4 @@
 # OkHttp (Okio)
 -dontwarn okio.**
 
--keep public class com.iopixel.library.DateTool
+-keepclasseswithmembers public class com.iopixel.library.DateTool
