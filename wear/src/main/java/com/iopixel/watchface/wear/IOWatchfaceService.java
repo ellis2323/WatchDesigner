@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.opengl.GLES20;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -132,14 +133,27 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
             ResultCallback<DailyTotalResult> {
 
         private GoogleApiClient mGoogleApiClient;
-        private boolean mStepsRequested;
-        private boolean mRegisteredReceiver = false;
-        public int mStepsTotal = 0;
+        private boolean mStepsRequested = false;
+        private boolean mRegisteredTimeInfoReceiver = false;
+        private boolean mRegisteredBatteryInfoReceiver = false;
+        private int mStepsTotal = 0;
+        private int mBatteryWear = 0;
+        private int mBatteryPhone = 0;
 
-        private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+
+        private final BroadcastReceiver mTimeInfoReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 invalidate();
+            }
+        };
+
+        private final BroadcastReceiver mBatteryInfoReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                mBatteryWear = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+                Log.d("IOPIXEL === Wear Battery " + mBatteryWear);
+                Native.WearBattery(mBatteryWear);
             }
         };
 
@@ -218,20 +232,27 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
         }
 
         private void registerReceiver() {
-            if (mRegisteredReceiver) {
-                return;
+            if (!mRegisteredTimeInfoReceiver) {
+                mRegisteredTimeInfoReceiver = true;
+                IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
+                IOWatchfaceService.this.registerReceiver(mTimeInfoReceiver, filter);
             }
-            mRegisteredReceiver = true;
-            IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
-            IOWatchfaceService.this.registerReceiver(mReceiver, filter);
+            if (!mRegisteredBatteryInfoReceiver) {
+                mRegisteredBatteryInfoReceiver = true;
+                IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+                IOWatchfaceService.this.registerReceiver(mBatteryInfoReceiver, filter);
+            }
         }
 
         private void unregisterReceiver() {
-            if (!mRegisteredReceiver) {
-                return;
+            if (mRegisteredTimeInfoReceiver) {
+                mRegisteredTimeInfoReceiver = false;
+                IOWatchfaceService.this.unregisterReceiver(mTimeInfoReceiver);
             }
-            mRegisteredReceiver = false;
-            IOWatchfaceService.this.unregisterReceiver(mReceiver);
+            if (mRegisteredBatteryInfoReceiver) {
+                mRegisteredBatteryInfoReceiver = false;
+                IOWatchfaceService.this.unregisterReceiver(mBatteryInfoReceiver);
+            }
         }
 
 
@@ -260,6 +281,9 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
 
             Native.OnDraw();
             if (isVisible() && !isInAmbientMode()) {
+                try {
+                    Thread.sleep(10, 0);
+                } catch (InterruptedException e) {}
                 invalidate();
             }
         }
@@ -287,19 +311,14 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
         private void getTotalSteps() {
             Log.d("getTotalSteps()");
 
-            if ((mGoogleApiClient != null)
-                    && (mGoogleApiClient.isConnected())
-                    && (!mStepsRequested)) {
-
-                mStepsRequested = true;
-
-                PendingResult<DailyTotalResult> stepsResult =
-                        Fitness.HistoryApi.readDailyTotal(
-                                mGoogleApiClient,
-                                DataType.TYPE_STEP_COUNT_DELTA);
-
-                stepsResult.setResultCallback(this);
+            if ((mGoogleApiClient == null) || (!mGoogleApiClient.isConnected()) || (mStepsRequested)) {
+                return;
             }
+
+            mStepsRequested = true;
+            PendingResult<DailyTotalResult> stepsResult;
+            stepsResult= Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_STEP_COUNT_DELTA);
+            stepsResult.setResultCallback(this);
         }
 
         private void subscribeToSteps() {
@@ -340,7 +359,6 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
             mStepsRequested = false;
             if (dailyTotalResult.getStatus().isSuccess()) {
                 List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
-                ;
                 if (!points.isEmpty()) {
                     mStepsTotal = points.get(0).getValue(Field.FIELD_STEPS).asInt();
                     Log.d("steps updated: %d", mStepsTotal);

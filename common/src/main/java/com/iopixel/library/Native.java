@@ -38,9 +38,13 @@ public class Native {
     public static native void OnSurfaceCreated(String apkPath, String pwdPath, int width, int height);
     public static native void Shape(int shape);
     public static native void OnDraw();
+
     public static native void SendEvent(int x, int y);
     public static native void AmbientMode(boolean mode);
     public static native void VisibilityChanged(boolean visibility);
+    public static native void WearBattery(int percent);
+    public static native void PhoneBattery(int percent);
+
     public static native void LoadGWD(String path);
 
 }
