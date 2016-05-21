@@ -16,6 +16,7 @@
 package com.iopixel.watchface.wear.app.main;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import android.support.design.widget.Snackbar;
 
@@ -23,6 +24,7 @@ import org.jraf.android.util.async.Task;
 import org.jraf.android.util.collection.CollectionUtil;
 
 import com.iopixel.library.Storage;
+import com.iopixel.library.Wear;
 import com.iopixel.watchface.wear.R;
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceCursor;
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceSelection;
@@ -37,17 +39,22 @@ class DeleteTask extends Task<MainActivity> {
         mSize = selectedIds.length;
         selection.id(selectedIds);
 
-        // Delete all the gwd files
+        // Delete the local gwd files
         WatchfaceCursor c = selection.query(getActivity());
+        ArrayList<String> publicIds = new ArrayList<>(c.getCount());
         try {
             while (c.moveToNext()) {
                 String publicId = c.getPublicId();
+                publicIds.add(publicId);
                 File gwdFile = Storage.getGwdFile(getActivity(), publicId);
                 gwdFile.delete();
             }
         } finally {
             c.close();
         }
+
+        // Delete the gwd files on the wear device
+        Wear.sendMessage(Wear.PATH_MESSAGE_DELETE_GWDS_REQUEST, publicIds.toArray(new String[publicIds.size()]));
 
         // Delete from the provider
         selection.delete(getActivity());

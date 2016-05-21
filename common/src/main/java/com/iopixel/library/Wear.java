@@ -16,6 +16,7 @@
 package com.iopixel.library;
 
 import java.io.File;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Set;
@@ -24,6 +25,7 @@ import android.support.annotation.Nullable;
 
 import org.jraf.android.util.log.Log;
 import org.jraf.android.util.log.LogUtil;
+import org.jraf.android.util.serializable.SerializableUtil;
 
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
@@ -38,6 +40,8 @@ public class Wear {
 
     public static final String PATH_MESSAGE_SET_GWD_REQUEST = PATH_MESSAGE_PREFIX + "setGwd" + PATH_MESSAGE_SUFFIX_REQUEST;
     public static final String PATH_MESSAGE_SET_GWD_REPLY = PATH_MESSAGE_PREFIX + "setGwd" + PATH_MESSAGE_SUFFIX_REPLY;
+    public static final String PATH_MESSAGE_DELETE_GWDS_REQUEST = PATH_MESSAGE_PREFIX + "deleteGwds" + PATH_MESSAGE_SUFFIX_REQUEST;
+    public static final String PATH_MESSAGE_DELETE_GWDS_REPLY = PATH_MESSAGE_PREFIX + "deleteGwds" + PATH_MESSAGE_SUFFIX_REPLY;
 
     public static final byte[] DATA_OK = {0};
     public static final byte[] DATA_KO = {1};
@@ -66,6 +70,9 @@ public class Wear {
             Log.d("Could not find any nearby nodes: give up");
             return;
         }
+        if (!file.exists()) {
+            Log.w("Trying to send a non existing file: give up - %s", file);
+        }
         WearFileTransfer wearFileTransfer = new WearFileTransfer.Builder(firstNode).setTargetName(file.getName()).setFile(file).setOnFileTransferResultListener(
                 new WearFileTransfer.OnFileTransferRequestListener() {
                     @Override
@@ -77,17 +84,26 @@ public class Wear {
         wearFileTransfer.startTransfer();
     }
 
-    public static void sendMessage(String path, String data) {
+    public static void sendMessage(String path, byte[] data) {
         Node firstNode = getFirstNode();
         if (firstNode == null) {
             Log.d("Could not find any nearby nodes: give up");
             return;
         }
-        byte[] dataBytes = new byte[0];
+        WearManager.getInstance().sendMessage(firstNode.getId(), path, data);
+    }
+
+    public static void sendMessage(String path, String data) {
+        byte[] dataBytes = null;
         try {
             dataBytes = data.getBytes("utf-8");
         } catch (UnsupportedEncodingException ignored) {}
-        WearManager.getInstance().sendMessage(firstNode.getId(), path, dataBytes);
+        sendMessage(path, dataBytes);
     }
 
+    public static void sendMessage(String path, Serializable data) {
+        byte[] dataBytes = null;
+        dataBytes = SerializableUtil.serialize(data);
+        sendMessage(path, dataBytes);
+    }
 }

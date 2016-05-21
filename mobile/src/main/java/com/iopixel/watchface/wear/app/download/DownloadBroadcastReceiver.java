@@ -84,7 +84,7 @@ public class DownloadBroadcastReceiver extends BroadcastReceiver {
 
     private void onFail(Context context, String description) {
         Log.d("description=%s", description);
-        String toastText = context.getString(R.string.download_failToast_download, description);
+        String toastText = context.getString(R.string.download_fail_download, description);
         showToast(context, toastText);
     }
 
@@ -98,7 +98,7 @@ public class DownloadBroadcastReceiver extends BroadcastReceiver {
             org.jraf.android.util.file.FileUtil.copy(downloadedFile, destination);
         } catch (IOException e) {
             Log.w(e, "Could not copy file");
-            String toastText = context.getString(R.string.download_failToast_install, fileName);
+            String toastText = context.getString(R.string.download_fail_install, fileName);
             showToast(context, toastText);
             return;
         }
@@ -106,7 +106,7 @@ public class DownloadBroadcastReceiver extends BroadcastReceiver {
         String watchfaceName = GWDReader.loadGWD(destination);
         if (watchfaceName == null) {
             Log.w("Could not extract the icon: give up");
-            String toastText = context.getString(R.string.download_failToast_extract, description);
+            String toastText = context.getString(R.string.download_fail_extract, description);
             showToast(context, toastText);
             return;
         }
@@ -118,7 +118,7 @@ public class DownloadBroadcastReceiver extends BroadcastReceiver {
         Wear.sendAFile(destination);
 
         // Success toast
-        String toastText = context.getString(R.string.download_successToast, fileName);
+        String toastText = context.getString(R.string.download_success, fileName);
         showToast(context, toastText);
     }
 

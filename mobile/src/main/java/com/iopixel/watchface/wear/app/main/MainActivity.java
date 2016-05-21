@@ -21,12 +21,12 @@ import java.util.Set;
 import android.databinding.DataBindingUtil;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import org.jraf.android.util.async.TaskFragment;
 import org.jraf.android.util.dialog.AlertDialogFragment;
@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
                         Wear.sendAFile(gwdFile);
                     }
 
-                    Toast.makeText(MainActivity.this, R.string.main_watchfaceSetToast, Toast.LENGTH_LONG).show();
+                    Snackbar.make(mBinding.getRoot(), R.string.main_set_success, Snackbar.LENGTH_SHORT).show();
                     break;
             }
         }

@@ -18,6 +18,7 @@ package com.iopixel.watchface.wear;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.List;
 
 import android.content.BroadcastReceiver;
@@ -38,6 +39,7 @@ import android.view.WindowInsets;
 
 import org.jraf.android.util.log.Log;
 import org.jraf.android.util.log.LogUtil;
+import org.jraf.android.util.serializable.SerializableUtil;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -109,6 +111,19 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
                         Log.d("gwd doesn't exist");
                         WearManager.getInstance().sendMessage(messageEvent.getSourceNodeId(), Wear.PATH_MESSAGE_SET_GWD_REPLY, Wear.DATA_KO);
                     }
+                    break;
+
+                case Wear.PATH_MESSAGE_DELETE_GWDS_REQUEST:
+                    String[] publicIds = SerializableUtil.deserialize(messageEvent.getData());
+                    Log.d("publicIds=%s", Arrays.toString(publicIds));
+                    // Delete the files
+                    for (String id : publicIds) {
+                        gwdFile = Storage.getInternalGwdFile(IOWatchfaceService.this, id);
+                        gwdFile.delete();
+                    }
+
+                    // Reply OK
+                    WearManager.getInstance().sendMessage(messageEvent.getSourceNodeId(), Wear.PATH_MESSAGE_DELETE_GWDS_REPLY, Wear.DATA_OK);
                     break;
             }
         }
