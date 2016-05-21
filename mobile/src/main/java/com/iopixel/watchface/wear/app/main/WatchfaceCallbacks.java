@@ -20,5 +20,5 @@ import java.util.Set;
 public interface WatchfaceCallbacks {
     void onWatchfaceClick(String publicId);
 
-    void onWatchfacesSelected(Set<String> selectedPublicIds);
+    void onWatchfacesSelected(Set<Long> selectedIds);
 }

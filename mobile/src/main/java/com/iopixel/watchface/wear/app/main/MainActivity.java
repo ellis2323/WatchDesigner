@@ -21,6 +21,7 @@ import java.util.Set;
 import android.databinding.DataBindingUtil;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.view.Menu;
@@ -28,6 +29,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import org.jraf.android.util.async.Task;
+import org.jraf.android.util.async.TaskFragment;
+import org.jraf.android.util.collection.CollectionUtil;
+import org.jraf.android.util.dialog.AlertDialogFragment;
+import org.jraf.android.util.dialog.AlertDialogListener;
 import org.jraf.android.util.log.Log;
 
 import com.google.android.gms.wearable.MessageEvent;
@@ -42,7 +48,9 @@ import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceSelection;
 import com.iopixel.watchface.wear.databinding.MainBinding;
 
 
-public class MainActivity extends AppCompatActivity implements WatchfaceCallbacks, ActionMode.Callback {
+public class MainActivity extends AppCompatActivity implements WatchfaceCallbacks, ActionMode.Callback, AlertDialogListener {
+    private static final int DIALOG_DELETE_CONFIRM = 0;
+
     private MainBinding mBinding;
     private String mGwdToSendPublicId;
     private ActionMode mActionMode;
@@ -117,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
     }
 
     @Override
-    public void onWatchfacesSelected(Set<String> selectedPublicIds) {
+    public void onWatchfacesSelected(Set<Long> selectedPublicIds) {
         if (selectedPublicIds.isEmpty()) {
             mActionMode.finish();
         } else {
@@ -153,6 +161,11 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_delete:
+                int quantity = getWatchfaceGridFragment().getSelection().size();
+                String message = getResources().getQuantityString(R.plurals.main_delete_confirm, quantity, quantity);
+                AlertDialogFragment.newInstance(DIALOG_DELETE_CONFIRM).message(message).positiveButton(android.R.string.ok)
+                        .negativeButton(android.R.string.cancel)
+                        .show(this);
                 return true;
         }
         return false;
@@ -163,6 +176,40 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
         mActionMode = null;
         getWatchfaceGridFragment().stopSelectionMode();
     }
+
+
+    //
+    //region AlertDialogListener.
+    //
+
+    @Override
+    public void onDialogClickPositive(int tag, Object payload) {
+        new TaskFragment(new Task<MainActivity>() {
+            public int mSize;
+
+            @Override
+            protected void doInBackground() throws Throwable {
+                WatchfaceSelection selection = new WatchfaceSelection();
+                long[] selectedIds = CollectionUtil.unwrapLong(getWatchfaceGridFragment().getSelection());
+                mSize = selectedIds.length;
+                selection.id(selectedIds);
+                selection.delete(getActivity());
+            }
+
+            @Override
+            protected void onPostExecuteOk() {
+                if (mActionMode != null) mActionMode.finish();
+                String message = getResources().getQuantityString(R.plurals.main_delete_success, mSize, mSize);
+                Snackbar.make(mBinding.getRoot(), message, Snackbar.LENGTH_SHORT).show();
+            }
+        }).execute(this);
+    }
+
+    @Override
+    public void onDialogClickNegative(int tag, Object payload) {}
+
+    @Override
+    public void onDialogClickListItem(int tag, int index, Object payload) {}
 
     //endregion
 }

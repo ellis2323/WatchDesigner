@@ -42,7 +42,7 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
     private WatchfaceGridBinding mBinding;
     private WatchfaceGridAdapter mAdapter;
     private GridLayoutManager mLayoutManager;
-    private Set<String> mSelection;
+    private Set<Long> mSelection;
 
     @Nullable
     @Override
@@ -83,7 +83,7 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
-            mSelection = (Set<String>) savedInstanceState.getSerializable("selection");
+            mSelection = (Set<Long>) savedInstanceState.getSerializable("selection");
         }
         getLoaderManager().initLoader(0, null, this);
     }
@@ -137,7 +137,7 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
         mAdapter.stopSelectionMode();
     }
 
-    public Set<String> getSelection() {
+    public Set<Long> getSelection() {
         return mAdapter.getSelection();
     }
 }

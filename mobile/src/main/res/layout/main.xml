@@ -14,18 +14,19 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <LinearLayout
+    <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
         <fragment
             android:id="@+id/fraGrid"
             android:name="com.iopixel.watchface.wear.app.main.grid.WatchfaceGridFragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            tools:layout="@layout/watchface_grid" />
 
-    </LinearLayout>
+    </android.support.design.widget.CoordinatorLayout>
 </layout>

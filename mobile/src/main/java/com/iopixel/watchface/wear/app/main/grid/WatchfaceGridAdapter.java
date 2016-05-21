@@ -49,7 +49,7 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
     @Nullable
     private WatchfaceCursor mCursor;
     private boolean mSelectionMode;
-    private Set<String> mSelection = new HashSet<>(10);
+    private Set<Long> mSelection = new HashSet<>(10);
 
     public WatchfaceGridAdapter(Context context, WatchfaceCallbacks callbacks) {
         mContext = context;
@@ -103,12 +103,13 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
             assert mCursor != null;
             mCursor.moveToPosition(position);
             String publicId = mCursor.getPublicId();
+            long id = mCursor.getId();
             if (mSelectionMode) {
                 // Toggle selected state for this item
-                if (mSelection.contains(publicId)) {
-                    mSelection.remove(publicId);
+                if (mSelection.contains(id)) {
+                    mSelection.remove(id);
                 } else {
-                    mSelection.add(publicId);
+                    mSelection.add(id);
                 }
 
                 // If no items selected, stop selection mode
@@ -140,8 +141,8 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
                 mCursor.moveToPosition(position);
 
                 // Add the clicked item to the selection
-                String publicId = mCursor.getPublicId();
-                mSelection.add(publicId);
+                long id = mCursor.getId();
+                mSelection.add(id);
 
                 // Notify callbacks
                 mCallbacks.onWatchfacesSelected(mSelection);
@@ -155,15 +156,15 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
         return mSelectionMode;
     }
 
-    public boolean isSelected(String publicId) {
-        return mSelection.contains(publicId);
+    public boolean isSelected(long id) {
+        return mSelection.contains(id);
     }
 
-    public Set<String> getSelection() {
+    public Set<Long> getSelection() {
         return Collections.unmodifiableSet(mSelection);
     }
 
-    public void setSelection(Set<String> selection) {
+    public void setSelection(Set<Long> selection) {
         mSelection.clear();
         mSelection.addAll(selection);
         mSelectionMode = !mSelection.isEmpty();

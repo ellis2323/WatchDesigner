@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:foreground="?android:selectableItemBackground"
-            app:cardElevation="@{cursor.isSelected?@dimen/watchface_grid_item_elevation_selected:@dimen/watchface_grid_item_elevation_normal}">
+            app:cardElevation="@{cursor.isSelected ? @dimen/watchface_grid_item_elevation_selected : @dimen/watchface_grid_item_elevation_normal}">
 
             <FrameLayout
                 android:layout_width="wrap_content"
@@ -57,7 +57,7 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@{cursor.isSelected?@color/watchface_grid_item_selected:@color/watchface_grid_item_normal}"
+                    android:background="@{cursor.isSelected ? @color/watchface_grid_item_selected : @color/watchface_grid_item_normal}"
                     android:gravity="center_horizontal"
                     android:orientation="vertical"
                     android:padding="@dimen/watchface_grid_item_padding">
@@ -89,11 +89,11 @@
                     android:id="@+id/chkSelected"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:checked="@{adapter.isSelected(cursor.publicId)}"
+                    android:checked="@{adapter.isSelected(cursor.id)}"
                     android:clickable="false"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
-                    android:visibility="@{adapter.isSelectionMode?View.VISIBLE:View.GONE}" />
+                    android:visibility="@{adapter.isSelectionMode ? View.VISIBLE : View.GONE}" />
 
             </FrameLayout>
         </android.support.v7.widget.CardView>
