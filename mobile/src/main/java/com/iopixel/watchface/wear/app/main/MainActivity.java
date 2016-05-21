@@ -18,7 +18,10 @@ package com.iopixel.watchface.wear.app.main;
 import java.io.File;
 import java.util.Set;
 
+import android.app.DownloadManager;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -58,6 +61,37 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.main);
         WearManager.getInstance().addWearConsumer(mWearConsumer);
+
+        if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
+            // Called from the browser: start a download
+            Uri uri = getIntent().getData();
+            Log.d("uri=%s", uri);
+            String fileName = uri.getLastPathSegment();
+
+            if (fileName == null) {
+                // Handle special case for gearfaces.com
+                if (uri.toString().contains("wpdmdl")) {
+                    // Use a generic file name, because we don't have a real one
+                    fileName = "watchface.gwd";
+                } else {
+                    // This is not a download link: silently ignore
+                    finish();
+                    return;
+                }
+            }
+
+            DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+            DownloadManager.Request request = new DownloadManager.Request(uri);
+            request.setTitle(getString(R.string.app_name));
+            request.setDescription(getString(R.string.download_description, fileName));
+            request.setVisibleInDownloadsUi(false);
+            downloadManager.enqueue(request);
+
+            // Show a toast
+            Snackbar.make(mBinding.getRoot(), getString(R.string.main_download_started, fileName), Snackbar.LENGTH_SHORT).show();
+            // Forget this action, to not trigger the download again when the activity is recreated
+            setIntent(getIntent().setAction(Intent.ACTION_MAIN));
+        }
     }
 
     @Override

@@ -49,18 +49,12 @@
 
         <!-- Main activity (only testing for now) -->
         <activity android:name=".app.main.MainActivity">
+            <!-- Launcher -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Download -->
-        <activity
-            android:name=".app.download.DownloadActivity"
-            android:label="@string/app_name"
-            android:theme="@android:style/Theme.NoDisplay">
 
             <!-- Generic .gwd filter -->
             <intent-filter>
