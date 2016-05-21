@@ -21,7 +21,6 @@ import java.util.Set;
 import android.databinding.DataBindingUtil;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.view.Menu;
@@ -29,9 +28,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import org.jraf.android.util.async.Task;
 import org.jraf.android.util.async.TaskFragment;
-import org.jraf.android.util.collection.CollectionUtil;
 import org.jraf.android.util.dialog.AlertDialogFragment;
 import org.jraf.android.util.dialog.AlertDialogListener;
 import org.jraf.android.util.log.Log;
@@ -51,9 +48,9 @@ import com.iopixel.watchface.wear.databinding.MainBinding;
 public class MainActivity extends AppCompatActivity implements WatchfaceCallbacks, ActionMode.Callback, AlertDialogListener {
     private static final int DIALOG_DELETE_CONFIRM = 0;
 
-    private MainBinding mBinding;
+    MainBinding mBinding;
     private String mGwdToSendPublicId;
-    private ActionMode mActionMode;
+    ActionMode mActionMode;
     private WatchfaceGridFragment mWatchfaceGridFragment;
 
     @Override
@@ -89,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
         }
     };
 
-    private WatchfaceGridFragment getWatchfaceGridFragment() {
+    WatchfaceGridFragment getWatchfaceGridFragment() {
         if (mWatchfaceGridFragment == null) {
             mWatchfaceGridFragment = (WatchfaceGridFragment) getSupportFragmentManager().findFragmentById(R.id.fraGrid);
         }
@@ -184,25 +181,7 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
 
     @Override
     public void onDialogClickPositive(int tag, Object payload) {
-        new TaskFragment(new Task<MainActivity>() {
-            public int mSize;
-
-            @Override
-            protected void doInBackground() throws Throwable {
-                WatchfaceSelection selection = new WatchfaceSelection();
-                long[] selectedIds = CollectionUtil.unwrapLong(getWatchfaceGridFragment().getSelection());
-                mSize = selectedIds.length;
-                selection.id(selectedIds);
-                selection.delete(getActivity());
-            }
-
-            @Override
-            protected void onPostExecuteOk() {
-                if (mActionMode != null) mActionMode.finish();
-                String message = getResources().getQuantityString(R.plurals.main_delete_success, mSize, mSize);
-                Snackbar.make(mBinding.getRoot(), message, Snackbar.LENGTH_SHORT).show();
-            }
-        }).execute(this);
+        new TaskFragment(new DeleteTask()).execute(this);
     }
 
     @Override
