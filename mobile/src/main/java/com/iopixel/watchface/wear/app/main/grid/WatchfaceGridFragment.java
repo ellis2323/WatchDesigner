@@ -15,6 +15,8 @@
  */
 package com.iopixel.watchface.wear.app.main.grid;
 
+import java.util.Set;
+
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
@@ -113,4 +115,13 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
     }
 
     //endregion
+
+
+    public void stopSelectionMode() {
+        mAdapter.stopSelectionMode();
+    }
+
+    public Set<String> getSelection() {
+        return mAdapter.getSelection();
+    }
 }

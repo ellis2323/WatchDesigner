@@ -24,4 +24,6 @@
     <string name="download_successToast">Watchface %s successfully installed</string>
     <string name="main_watchface_empty">No watchfaces</string>
     <string name="main_watchfaceSetToast">Watchface set</string>
+    <string name="common_action_delete">Delete</string>
+
 </resources>

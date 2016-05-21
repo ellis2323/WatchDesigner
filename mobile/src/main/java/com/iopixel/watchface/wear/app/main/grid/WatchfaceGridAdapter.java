@@ -15,6 +15,10 @@
  */
 package com.iopixel.watchface.wear.app.main.grid;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
@@ -44,6 +48,8 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
     private final LayoutInflater mLayoutInflater;
     @Nullable
     private WatchfaceCursor mCursor;
+    private boolean mSelectionMode;
+    private Set<String> mSelection = new HashSet<>(10);
 
     public WatchfaceGridAdapter(Context context, WatchfaceCallbacks callbacks) {
         mContext = context;
@@ -63,11 +69,13 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
         assert mCursor != null;
         mCursor.moveToPosition(position);
         holder.binding.setCursor(mCursor);
+        holder.binding.setAdapter(this);
         // We must execute the bindings now, otherwise they will be deferred to later,
         // and the cursor position will have changed.
         holder.binding.executePendingBindings();
-        holder.binding.conCard.setTag(position);
-        holder.binding.conCard.setOnClickListener(mOnClickListener);
+        holder.binding.getRoot().setTag(position);
+        holder.binding.getRoot().setOnClickListener(mOnClickListener);
+        holder.binding.getRoot().setOnLongClickListener(mOnLongClickListener);
     }
 
     @Override
@@ -94,7 +102,70 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
             int position = (int) v.getTag();
             assert mCursor != null;
             mCursor.moveToPosition(position);
-            mCallbacks.onWatchfaceClicked(mCursor.getPublicId());
+            String publicId = mCursor.getPublicId();
+            if (mSelectionMode) {
+                // Toggle selected state for this item
+                if (mSelection.contains(publicId)) {
+                    mSelection.remove(publicId);
+                } else {
+                    mSelection.add(publicId);
+                }
+
+                // If no items selected, stop selection mode
+                if (mSelection.isEmpty()) {
+                    mSelectionMode = false;
+                }
+
+                // Notify callbacks
+                mCallbacks.onWatchfacesSelected(mSelection);
+
+                notifyDataSetChanged();
+            } else {
+                mCallbacks.onWatchfaceClick(publicId);
+            }
         }
     };
+
+    private View.OnLongClickListener mOnLongClickListener = new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View v) {
+            if (mSelectionMode) {
+                // Treat long click as normal click when in selection mode
+                mOnClickListener.onClick(v);
+            } else {
+                // Switch to selection mode
+                mSelectionMode = true;
+                int position = (int) v.getTag();
+                assert mCursor != null;
+                mCursor.moveToPosition(position);
+
+                // Add the clicked item to the selection
+                String publicId = mCursor.getPublicId();
+                mSelection.add(publicId);
+
+                // Notify callbacks
+                mCallbacks.onWatchfacesSelected(mSelection);
+            }
+            notifyDataSetChanged();
+            return true;
+        }
+    };
+
+    public boolean isSelectionMode() {
+        return mSelectionMode;
+    }
+
+    public boolean isSelected(String publicId) {
+        return mSelection.contains(publicId);
+    }
+
+    public Set<String> getSelection() {
+        return Collections.unmodifiableSet(mSelection);
+    }
+
+    public void stopSelectionMode() {
+        mSelectionMode = false;
+        mSelection.clear();
+        notifyDataSetChanged();
+    }
 }

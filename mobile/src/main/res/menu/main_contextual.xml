@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   Copyright (C) 2016 The WatchDesigner team
 
@@ -13,17 +14,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-<resources>
-
-    <style name="AppTheme" parent="Base.Theme.AppCompat.Light.DarkActionBar">
-        <item name="colorPrimary">@color/primary</item>
-        <item name="colorPrimaryDark">@color/primary_dark</item>
-        <item name="colorAccent">@color/accent</item>
-        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
-
-        <item name="android:textColorLink">@color/accent</item>
-        <item name="alertDialogTheme">@style/AppTheme.Dialog.Alert</item>
-        <item name="actionModeBackground">@color/primary_dark</item>
-    </style>
-
-</resources>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_delete"
+        android:icon="@drawable/ic_action_delete_24dp"
+        app:showAsAction="ifRoom|withText"
+        android:title="@string/common_action_delete" />
+</menu>

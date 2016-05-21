@@ -20,11 +20,19 @@
 
     <data>
 
+        <import type="android.view.View" />
+
         <import type="com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceCursor" />
+
+        <import type="com.iopixel.watchface.wear.app.main.grid.WatchfaceGridAdapter" />
 
         <variable
             name="cursor"
             type="WatchfaceCursor" />
+
+        <variable
+            name="adapter"
+            type="WatchfaceGridAdapter" />
     </data>
 
     <FrameLayout
@@ -42,33 +50,52 @@
             android:foreground="?android:selectableItemBackground"
             app:cardElevation="@{cursor.isSelected?@dimen/watchface_grid_item_elevation_selected:@dimen/watchface_grid_item_elevation_normal}">
 
-            <LinearLayout
+            <FrameLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@{cursor.isSelected?@color/watchface_grid_item_selected:@color/watchface_grid_item_normal}"
-                android:gravity="center_horizontal"
-                android:orientation="vertical"
-                android:padding="@dimen/watchface_grid_item_padding">
+                android:layout_height="wrap_content">
 
-                <ImageView
-                    android:id="@+id/imgPreview"
-                    android:layout_width="@dimen/watchface_grid_item_preview_width"
-                    android:layout_height="@dimen/watchface_grid_item_preview_width"
-                    app:iconFile="@{cursor.publicId}"
-                    tools:background="#888" />
-
-                <TextView
-                    android:id="@+id/txtName"
-                    android:layout_width="@dimen/watchface_grid_item_preview_width"
+                <LinearLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:ellipsize="end"
-                    android:gravity="center"
-                    android:lines="2"
-                    android:text="@{cursor.displayName}"
-                    tools:text="Super Cool Looking Watchface" />
+                    android:background="@{cursor.isSelected?@color/watchface_grid_item_selected:@color/watchface_grid_item_normal}"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:padding="@dimen/watchface_grid_item_padding">
 
-            </LinearLayout>
+                    <!-- Preview -->
+                    <ImageView
+                        android:id="@+id/imgPreview"
+                        android:layout_width="@dimen/watchface_grid_item_preview_width"
+                        android:layout_height="@dimen/watchface_grid_item_preview_width"
+                        app:iconFile="@{cursor.publicId}"
+                        tools:background="#888" />
+
+                    <!-- Name -->
+                    <TextView
+                        android:id="@+id/txtName"
+                        android:layout_width="@dimen/watchface_grid_item_preview_width"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:lines="2"
+                        android:text="@{cursor.displayName}"
+                        tools:text="Super Cool Looking Watchface" />
+
+                </LinearLayout>
+
+                <!-- Selected indicator -->
+                <CheckBox
+                    android:id="@+id/chkSelected"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="@{adapter.isSelected(cursor.publicId)}"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:visibility="@{adapter.isSelectionMode?View.VISIBLE:View.GONE}" />
+
+            </FrameLayout>
         </android.support.v7.widget.CardView>
     </FrameLayout>
 </layout>

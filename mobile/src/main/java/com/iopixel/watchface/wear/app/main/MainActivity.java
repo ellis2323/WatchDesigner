@@ -16,11 +16,16 @@
 package com.iopixel.watchface.wear.app.main;
 
 import java.io.File;
+import java.util.Set;
 
 import android.databinding.DataBindingUtil;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import org.jraf.android.util.log.Log;
@@ -31,13 +36,17 @@ import com.google.devrel.wcl.callbacks.AbstractWearConsumer;
 import com.iopixel.library.Storage;
 import com.iopixel.library.Wear;
 import com.iopixel.watchface.wear.R;
+import com.iopixel.watchface.wear.app.main.grid.WatchfaceGridFragment;
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceContentValues;
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceSelection;
 import com.iopixel.watchface.wear.databinding.MainBinding;
 
-public class MainActivity extends AppCompatActivity implements WatchfaceCallbacks {
+
+public class MainActivity extends AppCompatActivity implements WatchfaceCallbacks, ActionMode.Callback {
     private MainBinding mBinding;
     private String mGwdToSendPublicId;
+    private ActionMode mActionMode;
+    private WatchfaceGridFragment mWatchfaceGridFragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,13 +81,20 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
         }
     };
 
+    private WatchfaceGridFragment getWatchfaceGridFragment() {
+        if (mWatchfaceGridFragment == null) {
+            mWatchfaceGridFragment = (WatchfaceGridFragment) getSupportFragmentManager().findFragmentById(R.id.fraGrid);
+        }
+        return mWatchfaceGridFragment;
+    }
+
 
     //
     //region WatchfaceCallbacks.
     //
 
     @Override
-    public void onWatchfaceClicked(String publicId) {
+    public void onWatchfaceClick(String publicId) {
         mGwdToSendPublicId = publicId;
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -98,6 +114,54 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
                 return null;
             }
         }.execute();
+    }
+
+    @Override
+    public void onWatchfacesSelected(Set<String> selectedPublicIds) {
+        if (selectedPublicIds.isEmpty()) {
+            mActionMode.finish();
+        } else {
+            // Start action mode
+            if (mActionMode == null) mActionMode = startSupportActionMode(this);
+            assert mActionMode != null;
+            mActionMode.invalidate();
+        }
+    }
+
+    //endregion
+
+
+    //
+    //region ActionMode.Callback.
+    //
+
+    @Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.main_contextual, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        int quantity = getWatchfaceGridFragment().getSelection().size();
+        mode.setTitle("" + quantity);
+        return false;
+    }
+
+    @Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_delete:
+                return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onDestroyActionMode(ActionMode mode) {
+        mActionMode = null;
+        getWatchfaceGridFragment().stopSelectionMode();
     }
 
     //endregion

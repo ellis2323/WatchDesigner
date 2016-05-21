@@ -15,6 +15,10 @@
  */
 package com.iopixel.watchface.wear.app.main;
 
+import java.util.Set;
+
 public interface WatchfaceCallbacks {
-    void onWatchfaceClicked(String publicId);
+    void onWatchfaceClick(String publicId);
+
+    void onWatchfacesSelected(Set<String> selectedPublicIds);
 }
