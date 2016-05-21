@@ -163,6 +163,15 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
         return Collections.unmodifiableSet(mSelection);
     }
 
+    public void setSelection(Set<String> selection) {
+        mSelection.clear();
+        mSelection.addAll(selection);
+        mSelectionMode = !mSelection.isEmpty();
+        notifyDataSetChanged();
+        // Notify callbacks
+        mCallbacks.onWatchfacesSelected(mSelection);
+    }
+
     public void stopSelectionMode() {
         mSelectionMode = false;
         mSelection.clear();

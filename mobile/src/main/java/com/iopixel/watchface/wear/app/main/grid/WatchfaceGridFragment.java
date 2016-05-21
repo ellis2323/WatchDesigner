@@ -15,6 +15,7 @@
  */
 package com.iopixel.watchface.wear.app.main.grid;
 
+import java.io.Serializable;
 import java.util.Set;
 
 import android.content.res.Resources;
@@ -41,6 +42,7 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
     private WatchfaceGridBinding mBinding;
     private WatchfaceGridAdapter mAdapter;
     private GridLayoutManager mLayoutManager;
+    private Set<String> mSelection;
 
     @Nullable
     @Override
@@ -76,16 +78,26 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
         return mBinding.getRoot();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            mSelection = (Set<String>) savedInstanceState.getSerializable("selection");
+        }
         getLoaderManager().initLoader(0, null, this);
     }
 
-    /*
-     * Loader.
-     */
-    //region
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if (mAdapter != null && !mAdapter.getSelection().isEmpty()) {
+            outState.putSerializable("selection", (Serializable) mAdapter.getSelection());
+        }
+        super.onSaveInstanceState(outState);
+    }
+
+
+    //region Loaders.
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -97,6 +109,10 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
         if (mAdapter == null) {
             mAdapter = new WatchfaceGridAdapter(getActivity(), getCallbacks());
             mBinding.rclGrid.setAdapter(mAdapter);
+            // Restore saved selection (e.g. orientation change)
+            if (mSelection != null) {
+                mAdapter.setSelection(mSelection);
+            }
         }
         boolean empty = data.getCount() == 0;
         if (empty) {
