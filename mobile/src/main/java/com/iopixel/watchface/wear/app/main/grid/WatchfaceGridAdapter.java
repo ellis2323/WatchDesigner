@@ -105,6 +105,9 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
             String publicId = mCursor.getPublicId();
             long id = mCursor.getId();
             if (mSelectionMode) {
+                // Disallow selecting bundled watchfaces
+                if (mCursor.getIsBundled()) return;
+
                 // Toggle selected state for this item
                 if (mSelection.contains(id)) {
                     mSelection.remove(id);
@@ -134,11 +137,17 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
                 // Treat long click as normal click when in selection mode
                 mOnClickListener.onClick(v);
             } else {
-                // Switch to selection mode
-                mSelectionMode = true;
                 int position = (int) v.getTag();
                 assert mCursor != null;
                 mCursor.moveToPosition(position);
+
+                if (mCursor.getIsBundled()) {
+                    // Do not do anything for bundled watchfaces
+                    return true;
+                }
+
+                // Switch to selection mode
+                mSelectionMode = true;
 
                 // Add the clicked item to the selection
                 long id = mCursor.getId();

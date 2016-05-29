@@ -93,7 +93,7 @@
                     android:clickable="false"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
-                    android:visibility="@{adapter.isSelectionMode ? View.VISIBLE : View.GONE}" />
+                    android:visibility="@{adapter.isSelectionMode &amp;&amp; !cursor.isBundled ? View.VISIBLE : View.GONE}" />
 
             </FrameLayout>
         </android.support.v7.widget.CardView>
