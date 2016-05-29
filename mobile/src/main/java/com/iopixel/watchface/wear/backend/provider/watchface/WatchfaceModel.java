@@ -51,4 +51,9 @@ public interface WatchfaceModel extends BaseModel {
      */
     @NonNull
     Date getInstallDate();
+
+    /**
+     * Is this watchface a 'bundled' one?  If yes it cannot be deleted?
+     */
+    boolean getIsBundled();
 }

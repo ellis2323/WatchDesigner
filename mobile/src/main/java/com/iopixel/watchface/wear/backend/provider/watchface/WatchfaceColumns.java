@@ -52,6 +52,11 @@ public class WatchfaceColumns implements BaseColumns {
      */
     public static final String INSTALL_DATE = "install_date";
 
+    /**
+     * Is this watchface a 'bundled' one?  If yes it cannot be deleted?
+     */
+    public static final String IS_BUNDLED = "is_bundled";
+
 
     public static final String DEFAULT_ORDER = TABLE_NAME + "." +_ID;
 
@@ -61,7 +66,8 @@ public class WatchfaceColumns implements BaseColumns {
             PUBLIC_ID,
             DISPLAY_NAME,
             IS_SELECTED,
-            INSTALL_DATE
+            INSTALL_DATE,
+            IS_BUNDLED
     };
     // @formatter:on
 
@@ -72,6 +78,7 @@ public class WatchfaceColumns implements BaseColumns {
             if (c.equals(DISPLAY_NAME) || c.contains("." + DISPLAY_NAME)) return true;
             if (c.equals(IS_SELECTED) || c.contains("." + IS_SELECTED)) return true;
             if (c.equals(INSTALL_DATE) || c.contains("." + INSTALL_DATE)) return true;
+            if (c.equals(IS_BUNDLED) || c.contains("." + IS_BUNDLED)) return true;
         }
         return false;
     }

@@ -26,6 +26,13 @@
       "name": "install_date",
       "type": "Date",
       "nullable": false
+    },
+    {
+      "documentation": "Is this watchface a 'bundled' one?  If yes it cannot be deleted?",
+      "name": "is_bundled",
+      "type": "Boolean",
+      "nullable": false,
+      "defaultValue": "false"
     }
   ],
 

@@ -13,21 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.iopixel.watchface.wear.databinding;
+package com.iopixel.library;
 
-import java.io.File;
-
-import android.databinding.BindingAdapter;
-import android.widget.ImageView;
-
-import com.iopixel.library.Storage;
-import com.iopixel.watchface.wear.R;
-import com.squareup.picasso.Picasso;
-
-public class ImageViewDatabindingAdapter {
-    @BindingAdapter("iconFile")
-    public static void loadImage(ImageView view, String publicId) {
-        File previewFile = Storage.getPreviewImageFile(view.getContext(), publicId);
-        Picasso.with(view.getContext()).load(previewFile).placeholder(R.drawable.preview_placeholder).into(view);
-    }
+public class Bundled {
+    public static final String WF_BUNDLED_0_PUBLIC_ID = "bundled_0";
+    public static final String WF_BUNDLED_1_PUBLIC_ID = "bundled_1";
 }

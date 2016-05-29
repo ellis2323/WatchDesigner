@@ -16,6 +16,10 @@
 package com.iopixel.watchface.wear.app.main;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Set;
 
 import android.app.DownloadManager;
@@ -30,15 +34,18 @@ import android.support.v7.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 
 import org.jraf.android.util.async.TaskFragment;
 import org.jraf.android.util.dialog.AlertDialogFragment;
 import org.jraf.android.util.dialog.AlertDialogListener;
+import org.jraf.android.util.io.IoUtil;
 import org.jraf.android.util.log.Log;
 
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.devrel.wcl.WearManager;
 import com.google.devrel.wcl.callbacks.AbstractWearConsumer;
+import com.iopixel.library.Bundled;
 import com.iopixel.library.Storage;
 import com.iopixel.library.Wear;
 import com.iopixel.watchface.wear.R;
@@ -46,6 +53,7 @@ import com.iopixel.watchface.wear.app.main.grid.WatchfaceGridFragment;
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceContentValues;
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceSelection;
 import com.iopixel.watchface.wear.databinding.MainBinding;
+import com.iopixel.watchface.wear.library.GWDReader;
 
 
 public class MainActivity extends AppCompatActivity implements WatchfaceCallbacks, ActionMode.Callback, AlertDialogListener {
@@ -62,6 +70,9 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
         mBinding = DataBindingUtil.setContentView(this, R.layout.main);
         WearManager.getInstance().addWearConsumer(mWearConsumer);
 
+        // Check if the bundled watchfaces are installed (first time case)
+        checkForBundledWatchfaces();
+
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
             // Called from the browser: start a download
             Uri uri = getIntent().getData();
@@ -75,7 +86,6 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
                     fileName = "watchface.gwd";
                 } else {
                     // This is not a download link: silently ignore
-                    finish();
                     return;
                 }
             }
@@ -92,6 +102,55 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
             // Forget this action, to not trigger the download again when the activity is recreated
             setIntent(getIntent().setAction(Intent.ACTION_MAIN));
         }
+    }
+
+    private void checkForBundledWatchfaces() {
+        new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                File bundledGwd0File = Storage.getGwdFile(MainActivity.this, Bundled.WF_BUNDLED_0_PUBLIC_ID);
+                File bundledGwd1File = Storage.getGwdFile(MainActivity.this, Bundled.WF_BUNDLED_1_PUBLIC_ID);
+                if (bundledGwd0File.exists() && bundledGwd1File.exists()) {
+                    // Bundled watchfaces are already installed, stop here
+                    return false;
+                }
+
+                // Show a "loading" panel during the installation
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mBinding.conLoading.setVisibility(View.VISIBLE);
+                    }
+                });
+
+                // Copy the watchfaces from the assets folder to the external storage
+                try {
+                    InputStream bundledGwd0In = getAssets().open("bundled_0.gwd");
+                    InputStream bundledGwd1In = getAssets().open("bundled_1.gwd");
+                    OutputStream bundledGwd0Out = new FileOutputStream(bundledGwd0File);
+                    OutputStream bundledGwd1Out = new FileOutputStream(bundledGwd1File);
+                    IoUtil.copy(bundledGwd0In, bundledGwd0Out);
+                    IoUtil.copy(bundledGwd1In, bundledGwd1Out);
+                } catch (IOException e) {
+                    Log.e(e, "Could not install bundled watchfaces");
+                }
+
+                // Extract icons
+                GWDReader.loadGWD(bundledGwd0File);
+                GWDReader.loadGWD(bundledGwd1File);
+
+                return true;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+                if (result) {
+                    mBinding.conLoading.setVisibility(View.GONE);
+                    getWatchfaceGridFragment().reload();
+                }
+
+            }
+        }.execute();
     }
 
     @Override
@@ -207,6 +266,8 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
         mActionMode = null;
         getWatchfaceGridFragment().stopSelectionMode();
     }
+
+    //endregion
 
 
     //

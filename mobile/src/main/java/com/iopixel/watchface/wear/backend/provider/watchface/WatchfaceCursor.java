@@ -33,6 +33,7 @@ public class WatchfaceCursor extends AbstractCursor implements WatchfaceModel {
     /**
      * Primary key.
      */
+    @Override
     public long getId() {
         Long res = getLongOrNull(WatchfaceColumns._ID);
         if (res == null)
@@ -44,6 +45,7 @@ public class WatchfaceCursor extends AbstractCursor implements WatchfaceModel {
      * Public id of the watchface, which is used to build file names (e.g. "xyw_superwf_v2").
      * Cannot be {@code null}.
      */
+    @Override
     @NonNull
     public String getPublicId() {
         String res = getStringOrNull(WatchfaceColumns.PUBLIC_ID);
@@ -56,6 +58,7 @@ public class WatchfaceCursor extends AbstractCursor implements WatchfaceModel {
      * Display name (e.g. "Super Duper Watchface v2").
      * Cannot be {@code null}.
      */
+    @Override
     @NonNull
     public String getDisplayName() {
         String res = getStringOrNull(WatchfaceColumns.DISPLAY_NAME);
@@ -67,6 +70,7 @@ public class WatchfaceCursor extends AbstractCursor implements WatchfaceModel {
     /**
      * Is it the currently selected watchface?<br/>At any time, the value should be {@code true} for one and only one row.
      */
+    @Override
     public boolean getIsSelected() {
         Boolean res = getBooleanOrNull(WatchfaceColumns.IS_SELECTED);
         if (res == null)
@@ -78,11 +82,23 @@ public class WatchfaceCursor extends AbstractCursor implements WatchfaceModel {
      * When was the watchface installed.
      * Cannot be {@code null}.
      */
+    @Override
     @NonNull
     public Date getInstallDate() {
         Date res = getDateOrNull(WatchfaceColumns.INSTALL_DATE);
         if (res == null)
             throw new NullPointerException("The value of 'install_date' in the database was null, which is not allowed according to the model definition");
+        return res;
+    }
+
+    /**
+     * Is this watchface a 'bundled' one?  If yes it cannot be deleted?
+     */
+    @Override
+    public boolean getIsBundled() {
+        Boolean res = getBooleanOrNull(WatchfaceColumns.IS_BUNDLED);
+        if (res == null)
+            throw new NullPointerException("The value of 'is_bundled' in the database was null, which is not allowed according to the model definition");
         return res;
     }
 }

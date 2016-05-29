@@ -97,4 +97,13 @@ public class WatchfaceContentValues extends AbstractContentValues {
         mContentValues.put(WatchfaceColumns.INSTALL_DATE, value);
         return this;
     }
+
+    /**
+     * Is this watchface a 'bundled' one?  If yes it cannot be deleted?
+     */
+    public WatchfaceContentValues putIsBundled(boolean value) {
+        mContentValues.put(WatchfaceColumns.IS_BUNDLED, value);
+        return this;
+    }
+
 }

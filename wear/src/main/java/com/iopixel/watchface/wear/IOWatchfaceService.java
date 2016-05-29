@@ -16,7 +16,10 @@
 package com.iopixel.watchface.wear;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +40,7 @@ import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
+import org.jraf.android.util.io.IoUtil;
 import org.jraf.android.util.log.Log;
 import org.jraf.android.util.log.LogUtil;
 import org.jraf.android.util.serializable.SerializableUtil;
@@ -56,6 +60,7 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableStatusCodes;
 import com.google.devrel.wcl.WearManager;
 import com.google.devrel.wcl.callbacks.AbstractWearConsumer;
+import com.iopixel.library.Bundled;
 import com.iopixel.library.I18NEngine;
 import com.iopixel.library.Native;
 import com.iopixel.library.Storage;
@@ -107,9 +112,29 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
                         // Reply OK
                         WearManager.getInstance().sendMessage(messageEvent.getSourceNodeId(), Wear.PATH_MESSAGE_SET_GWD_REPLY, Wear.DATA_OK);
                     } else {
-                        // We don't have it: ask for the transfer
-                        Log.d("gwd doesn't exist");
-                        WearManager.getInstance().sendMessage(messageEvent.getSourceNodeId(), Wear.PATH_MESSAGE_SET_GWD_REPLY, Wear.DATA_KO);
+                        // We don't have it
+                        if (Bundled.WF_BUNDLED_0_PUBLIC_ID.equals(publicId) || Bundled.WF_BUNDLED_1_PUBLIC_ID.equals(publicId)) {
+                            Log.d("gwd is bundled");
+                            // Special case: bundled gwd files
+                            // Copy the watchface from the assets folder to the external storage
+                            try {
+                                InputStream bundledGwdIn = getAssets().open(publicId + Storage.PREFIX_GWD);
+                                OutputStream bundledGwdOut = new FileOutputStream(gwdFile);
+                                IoUtil.copy(bundledGwdIn, bundledGwdOut);
+                            } catch (IOException e) {
+                                Log.e(e, "Could not install bundled watchfaces");
+                            }
+
+                            // Load it now
+                            Native.LoadGWD(gwdFile.getAbsolutePath());
+
+                            // Reply OK
+                            WearManager.getInstance().sendMessage(messageEvent.getSourceNodeId(), Wear.PATH_MESSAGE_SET_GWD_REPLY, Wear.DATA_OK);
+                        } else {
+                            // Ask for the transfer
+                            Log.d("gwd doesn't exist");
+                            WearManager.getInstance().sendMessage(messageEvent.getSourceNodeId(), Wear.PATH_MESSAGE_SET_GWD_REPLY, Wear.DATA_KO);
+                        }
                     }
                     break;
 
@@ -227,7 +252,7 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
         @Override
         public void onPropertiesChanged(Bundle properties) {
             super.onPropertiesChanged(properties);
-            // burnin protec†ion
+            // burnin protection
             boolean burnInProtection = properties.getBoolean(PROPERTY_BURN_IN_PROTECTION, false);
         }
 
@@ -332,7 +357,7 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
 
             mStepsRequested = true;
             PendingResult<DailyTotalResult> stepsResult;
-            stepsResult= Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_STEP_COUNT_DELTA);
+            stepsResult = Fitness.HistoryApi.readDailyTotal(mGoogleApiClient, DataType.TYPE_STEP_COUNT_DELTA);
             stepsResult.setResultCallback(this);
         }
 

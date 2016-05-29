@@ -25,6 +25,7 @@ import org.jraf.android.util.log.Log;
 
 public class Storage {
     private static final String PATH_GWD = "gwd";
+    public static final String PREFIX_GWD = ".gwd";
 
     public static String getAPKFileName(Context ctx) {
         try {
@@ -66,6 +67,6 @@ public class Storage {
     }
 
     public static File getInternalGwdFile(Context ctx, String publicId) {
-        return new File(ctx.getFilesDir(), publicId + ".gwd");
+        return new File(ctx.getFilesDir(), publicId + PREFIX_GWD);
     }
 }

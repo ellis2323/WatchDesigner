@@ -232,4 +232,19 @@ public class WatchfaceSelection extends AbstractSelection<WatchfaceSelection> {
         orderBy(WatchfaceColumns.INSTALL_DATE, false);
         return this;
     }
+
+    public WatchfaceSelection isBundled(boolean value) {
+        addEquals(WatchfaceColumns.IS_BUNDLED, toObjectArray(value));
+        return this;
+    }
+
+    public WatchfaceSelection orderByIsBundled(boolean desc) {
+        orderBy(WatchfaceColumns.IS_BUNDLED, desc);
+        return this;
+    }
+
+    public WatchfaceSelection orderByIsBundled() {
+        orderBy(WatchfaceColumns.IS_BUNDLED, false);
+        return this;
+    }
 }

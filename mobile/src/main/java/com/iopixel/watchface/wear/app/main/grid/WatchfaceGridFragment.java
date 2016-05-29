@@ -101,7 +101,7 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getContext(), WatchfaceColumns.CONTENT_URI, null, null, null, null);
+        return new CursorLoader(getContext(), WatchfaceColumns.CONTENT_URI, null, null, null, WatchfaceColumns.INSTALL_DATE + " DESC");
     }
 
     @Override
@@ -139,5 +139,9 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
 
     public Set<Long> getSelection() {
         return mAdapter.getSelection();
+    }
+
+    public void reload() {
+        mAdapter.notifyDataSetChanged();
     }
 }

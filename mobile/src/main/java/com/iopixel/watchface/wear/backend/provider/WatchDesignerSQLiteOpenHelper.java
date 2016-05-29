@@ -43,7 +43,8 @@ public class WatchDesignerSQLiteOpenHelper extends SQLiteOpenHelper {
             + WatchfaceColumns.PUBLIC_ID + " TEXT NOT NULL, "
             + WatchfaceColumns.DISPLAY_NAME + " TEXT NOT NULL, "
             + WatchfaceColumns.IS_SELECTED + " INTEGER NOT NULL DEFAULT 0, "
-            + WatchfaceColumns.INSTALL_DATE + " INTEGER NOT NULL "
+            + WatchfaceColumns.INSTALL_DATE + " INTEGER NOT NULL, "
+            + WatchfaceColumns.IS_BUNDLED + " INTEGER NOT NULL DEFAULT 0 "
             + ", CONSTRAINT unique_public_id UNIQUE (public_id) ON CONFLICT REPLACE"
             + " );";
 
