@@ -17,6 +17,7 @@ package com.iopixel.watchface.wear.app.main.grid;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import android.content.Context;
@@ -35,11 +36,29 @@ import com.iopixel.watchface.wear.databinding.WatchfaceGridTemBinding;
 
 public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdapter.ViewHolder> {
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final WatchfaceGridTemBinding binding;
+        final WatchfaceGridTemBinding binding;
 
         public ViewHolder(WatchfaceGridTemBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
+        }
+    }
+
+    public static class Payload {
+        private final Set<Long> mOldSelection;
+        private final Set<Long> mNewSelection;
+
+        public Payload(Set<Long> oldSelection, Set<Long> newSelection) {
+            mOldSelection = oldSelection;
+            mNewSelection = newSelection;
+        }
+
+        public boolean hasBeenSelected(long id) {
+            return mNewSelection.contains(id) && !mOldSelection.contains(id);
+        }
+
+        public boolean hasBeenDeselected(long id) {
+            return !mNewSelection.contains(id) && mOldSelection.contains(id);
         }
     }
 
@@ -65,7 +84,10 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, int position) {}
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position, List<Object> payloads) {
         assert mCursor != null;
         mCursor.moveToPosition(position);
         holder.binding.setCursor(mCursor);
@@ -76,6 +98,19 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
         holder.binding.getRoot().setTag(position);
         holder.binding.getRoot().setOnClickListener(mOnClickListener);
         holder.binding.getRoot().setOnLongClickListener(mOnLongClickListener);
+
+        if (!payloads.isEmpty()) {
+            Payload payload = (Payload) payloads.get(0);
+            if (payload.hasBeenSelected(holder.getItemId())) {
+                holder.binding.conCard.setScaleX(1f);
+                holder.binding.conCard.setScaleY(1f);
+                holder.binding.conCard.animate().scaleX(.85f).scaleY(.85f).setDuration(150);
+            } else if (payload.hasBeenDeselected(holder.getItemId())) {
+                holder.binding.conCard.setScaleX(.85f);
+                holder.binding.conCard.setScaleY(.85f);
+                holder.binding.conCard.animate().scaleX(1f).scaleY(1f).setDuration(150);
+            }
+        }
     }
 
     @Override
@@ -109,6 +144,7 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
                 if (mCursor.getIsBundled()) return;
 
                 // Toggle selected state for this item
+                Set<Long> oldSelection = new HashSet<>(mSelection);
                 if (mSelection.contains(id)) {
                     mSelection.remove(id);
                 } else {
@@ -123,7 +159,7 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
                 // Notify callbacks
                 mCallbacks.onWatchfacesSelected(mSelection);
 
-                notifyDataSetChanged();
+                notifyItemChanged(position, new Payload(oldSelection, mSelection));
             } else {
                 mCallbacks.onWatchfaceClick(publicId);
             }
@@ -151,12 +187,14 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
 
                 // Add the clicked item to the selection
                 long id = mCursor.getId();
+                Set<Long> oldSelection = new HashSet<>(mSelection);
                 mSelection.add(id);
 
                 // Notify callbacks
                 mCallbacks.onWatchfacesSelected(mSelection);
+
+                notifyItemChanged(position, new Payload(oldSelection, mSelection));
             }
-            notifyDataSetChanged();
             return true;
         }
     };
@@ -184,7 +222,8 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
 
     public void stopSelectionMode() {
         mSelectionMode = false;
+        Set<Long> oldSelection = new HashSet<>(mSelection);
         mSelection.clear();
-        notifyDataSetChanged();
+        notifyItemRangeChanged(0, getItemCount(), new Payload(oldSelection, mSelection));
     }
 }

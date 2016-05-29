@@ -113,6 +113,9 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
             if (mSelection != null) {
                 mAdapter.setSelection(mSelection);
             }
+
+//            // Animations
+//            mBinding.rclGrid.setItemAnimator(new WatchfaceItemAnimator(mAdapter));
         }
         boolean empty = data.getCount() == 0;
         if (empty) {

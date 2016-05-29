@@ -48,6 +48,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:foreground="?android:selectableItemBackground"
+            android:scaleX="@{adapter.isSelected(cursor.id) ? .85f : 1f}"
+            android:scaleY="@{adapter.isSelected(cursor.id) ? .85f : 1f}"
             app:cardElevation="@{cursor.isSelected ? @dimen/watchface_grid_item_elevation_selected : @dimen/watchface_grid_item_elevation_normal}">
 
             <FrameLayout
