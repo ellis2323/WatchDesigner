@@ -16,7 +16,7 @@
   -->
 <resources>
     <string name="app_name">WatchFace</string>
-    <string name="opengl_name">LOLO OpenGL</string>
+    <string name="opengl_name">Watch Designer</string>
     <string name="interactive_name">Sample Interactive</string>
     <string name="analog_name">Sample Analog</string>
     <string name="sweep_name">Sample Sweep</string>
