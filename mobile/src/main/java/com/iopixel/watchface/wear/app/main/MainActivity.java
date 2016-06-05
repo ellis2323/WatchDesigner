@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
 
 
     //
-    //region WatchfaceCallbacks.
+    //region Download info broadcast receiver.
     //
 
     private void registerInfoBroadcastReceiver() {
