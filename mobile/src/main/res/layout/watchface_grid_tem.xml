@@ -39,65 +39,59 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
-        android:paddingBottom="@{@dimen/watchface_grid_item_inter_padding / 2}"
-        android:paddingTop="@{@dimen/watchface_grid_item_inter_padding / 2}">
+        android:padding="@{@dimen/watchface_grid_item_inter_padding / 2}">
 
         <android.support.v7.widget.CardView
             android:id="@+id/conCard"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
             android:foreground="?android:selectableItemBackground"
             android:scaleX="@{adapter.isSelected(cursor.id) ? .85f : 1f}"
             android:scaleY="@{adapter.isSelected(cursor.id) ? .85f : 1f}"
             app:cardElevation="@{cursor.isSelected ? @dimen/watchface_grid_item_elevation_selected : @dimen/watchface_grid_item_elevation_normal}">
 
-            <FrameLayout
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:background="@{cursor.isSelected ? @color/watchface_grid_item_selected : @color/watchface_grid_item_normal}"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:padding="@dimen/watchface_grid_item_padding">
+
+                <!-- Preview -->
+                <ImageView
+                    android:id="@+id/imgPreview"
+                    android:layout_width="@dimen/watchface_grid_item_preview_width"
+                    android:layout_height="@dimen/watchface_grid_item_preview_width"
+                    app:iconFile="@{cursor.publicId}"
+                    tools:background="#888" />
+
+                <!-- Name -->
+                <TextView
+                    android:id="@+id/txtName"
+                    android:layout_width="@dimen/watchface_grid_item_preview_width"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:lines="2"
+                    android:text="@{cursor.displayName}"
+                    tools:text="Super Cool Looking Watchface" />
+
+            </LinearLayout>
+
+            <!-- Selected indicator -->
+            <CheckBox
+                android:id="@+id/chkSelected"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:checked="@{adapter.isSelected(cursor.id)}"
+                android:clickable="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:visibility="@{adapter.isSelectionMode &amp;&amp; !cursor.isBundled ? View.VISIBLE : View.GONE}" />
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@{cursor.isSelected ? @color/watchface_grid_item_selected : @color/watchface_grid_item_normal}"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical"
-                    android:padding="@dimen/watchface_grid_item_padding">
-
-                    <!-- Preview -->
-                    <ImageView
-                        android:id="@+id/imgPreview"
-                        android:layout_width="@dimen/watchface_grid_item_preview_width"
-                        android:layout_height="@dimen/watchface_grid_item_preview_width"
-                        app:iconFile="@{cursor.publicId}"
-                        tools:background="#888" />
-
-                    <!-- Name -->
-                    <TextView
-                        android:id="@+id/txtName"
-                        android:layout_width="@dimen/watchface_grid_item_preview_width"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:ellipsize="end"
-                        android:gravity="center"
-                        android:lines="2"
-                        android:text="@{cursor.displayName}"
-                        tools:text="Super Cool Looking Watchface" />
-
-                </LinearLayout>
-
-                <!-- Selected indicator -->
-                <CheckBox
-                    android:id="@+id/chkSelected"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="@{adapter.isSelected(cursor.id)}"
-                    android:clickable="false"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:visibility="@{adapter.isSelectionMode &amp;&amp; !cursor.isBundled ? View.VISIBLE : View.GONE}" />
-
-            </FrameLayout>
         </android.support.v7.widget.CardView>
     </FrameLayout>
 </layout>
