@@ -14,16 +14,18 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <Button
-        android:id="@+id/btnSendAFile"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Send a file" />
-
-</LinearLayout>
+    <TextView
+        android:id="@+id/txtGetWatchfaces"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@color/snackbar_bg"
+        android:gravity="center_vertical"
+        android:onClick="onGetWatchfacesClick"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:text="@string/main_getWatchfaces"
+        android:textColor="@android:color/white"
+        android:textSize="14sp" />
+</layout>

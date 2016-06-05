@@ -21,12 +21,21 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <fragment
-            android:id="@+id/fraGrid"
-            android:name="com.iopixel.watchface.wear.app.main.grid.WatchfaceGridFragment"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:layout="@layout/watchface_grid" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <fragment
+                android:id="@+id/fraGrid"
+                android:name="com.iopixel.watchface.wear.app.main.grid.WatchfaceGridFragment"
+                android:layout_width="match_parent"
+                android:layout_height="0px"
+                android:layout_weight="1"
+                tools:layout="@layout/watchface_grid" />
+
+            <include layout="@layout/main_get_watchfaces" />
+        </LinearLayout>
 
         <FrameLayout
             android:id="@+id/conLoading"

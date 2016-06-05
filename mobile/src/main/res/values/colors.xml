@@ -21,5 +21,6 @@
 
     <color name="watchface_grid_item_selected">#FFF</color>
     <color name="watchface_grid_item_normal">#EEE</color>
+    <color name="snackbar_bg">@color/primary_dark</color>
 
 </resources>

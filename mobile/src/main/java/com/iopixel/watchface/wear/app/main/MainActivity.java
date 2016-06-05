@@ -286,4 +286,11 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
     public void onDialogClickListItem(int tag, int index, Object payload) {}
 
     //endregion
+
+
+    public void onGetWatchfacesClick(View view) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.url_getWatchfaces)));
+        startActivity(browserIntent);
+    }
+
 }
