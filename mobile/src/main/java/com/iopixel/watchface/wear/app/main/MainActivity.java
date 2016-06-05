@@ -23,12 +23,16 @@ import java.io.OutputStream;
 import java.util.Set;
 
 import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.view.Menu;
@@ -49,6 +53,7 @@ import com.iopixel.library.Bundled;
 import com.iopixel.library.Storage;
 import com.iopixel.library.Wear;
 import com.iopixel.watchface.wear.R;
+import com.iopixel.watchface.wear.app.download.DownloadBroadcastReceiver;
 import com.iopixel.watchface.wear.app.main.grid.WatchfaceGridFragment;
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceContentValues;
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceSelection;
@@ -63,12 +68,15 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
     private String mGwdToSendPublicId;
     ActionMode mActionMode;
     private WatchfaceGridFragment mWatchfaceGridFragment;
+    private boolean mInfoBroadcastReceiverRegistered;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.main);
         WearManager.getInstance().addWearConsumer(mWearConsumer);
+
+        registerInfoBroadcastReceiver();
 
         // Check if the bundled watchfaces are installed (first time case)
         checkForBundledWatchfaces();
@@ -103,6 +111,37 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
             setIntent(getIntent().setAction(Intent.ACTION_MAIN));
         }
     }
+
+
+    //
+    //region WatchfaceCallbacks.
+    //
+
+    private void registerInfoBroadcastReceiver() {
+        if (!mInfoBroadcastReceiverRegistered) {
+            IntentFilter filter = new IntentFilter(DownloadBroadcastReceiver.ACTION_SHOW_INFO);
+            LocalBroadcastManager.getInstance(this).registerReceiver(mInfoBroadcastReceiver, filter);
+            mInfoBroadcastReceiverRegistered = true;
+        }
+    }
+
+    private void unregisterInfoBroadcastReceiver() {
+        if (mInfoBroadcastReceiverRegistered) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mInfoBroadcastReceiver);
+            mInfoBroadcastReceiverRegistered = false;
+        }
+    }
+
+    private BroadcastReceiver mInfoBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String infoText = intent.getStringExtra(DownloadBroadcastReceiver.EXTRA_INFO_TEXT);
+            Snackbar.make(mBinding.getRoot(), infoText, Snackbar.LENGTH_SHORT).show();
+        }
+    };
+
+    //endregion
+
 
     private void checkForBundledWatchfaces() {
         new AsyncTask<Void, Void, Boolean>() {
@@ -156,6 +195,7 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
     @Override
     protected void onDestroy() {
         WearManager.getInstance().removeWearConsumer(mWearConsumer);
+        unregisterInfoBroadcastReceiver();
         super.onDestroy();
     }
 
