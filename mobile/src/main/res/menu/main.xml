@@ -14,13 +14,8 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-<resources>
-    <style name="AppTheme.Dialog.Alert" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="colorAccent">@color/accent</item>
-    </style>
-
-    <style name="Widget.AppTheme.Button.Colored" parent="Widget.AppCompat.Button.Colored">
-        <item name="colorButtonNormal">@color/accent</item>
-        <item name="android:textColor">@android:color/white</item>
-    </style>
-</resources>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_about"
+        android:title="@string/main_action_about" />
+</menu>

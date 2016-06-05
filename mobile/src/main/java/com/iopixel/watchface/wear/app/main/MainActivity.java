@@ -40,6 +40,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import org.jraf.android.util.about.AboutActivityIntentBuilder;
 import org.jraf.android.util.async.TaskFragment;
 import org.jraf.android.util.dialog.AlertDialogFragment;
 import org.jraf.android.util.dialog.AlertDialogListener;
@@ -52,6 +53,7 @@ import com.google.devrel.wcl.callbacks.AbstractWearConsumer;
 import com.iopixel.library.Bundled;
 import com.iopixel.library.Storage;
 import com.iopixel.library.Wear;
+import com.iopixel.watchface.wear.BuildConfig;
 import com.iopixel.watchface.wear.R;
 import com.iopixel.watchface.wear.app.download.DownloadBroadcastReceiver;
 import com.iopixel.watchface.wear.app.main.grid.WatchfaceGridFragment;
@@ -142,6 +144,49 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
 
     //endregion
 
+
+    //
+    //region Menu.
+    //
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_about:
+                onAboutClicked();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void onAboutClicked() {
+        AboutActivityIntentBuilder builder = new AboutActivityIntentBuilder();
+        builder.setAppName(getString(R.string.app_name));
+        builder.setBuildDate(BuildConfig.BUILD_DATE);
+        builder.setGitSha1(BuildConfig.GIT_SHA1);
+        builder.setAuthorCopyright(getString(R.string.about_authorCopyright));
+        builder.setLicense(getString(R.string.about_License));
+        builder.setShareTextSubject(getString(R.string.about_shareText_subject));
+        builder.setShareTextBody(getString(R.string.about_shareText_body));
+        builder.setBackgroundResId(R.drawable.about_bg);
+        builder.addLink(getString(R.string.about_email_uri), getString(R.string.about_email_text));
+        builder.addLink(getString(R.string.about_web_uri), getString(R.string.about_web_text));
+        builder.addLink(getString(R.string.about_sources_uri), getString(R.string.about_sources_text));
+        builder.setIsLightIcons(true);
+        builder.setAuthorPlayStoreName(getString(R.string.about_authorPlaystoreName));
+        startActivity(builder.build(this));
+    }
+
+    //endregion
 
     private void checkForBundledWatchfaces() {
         new AsyncTask<Void, Void, Boolean>() {

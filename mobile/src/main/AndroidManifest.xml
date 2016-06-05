@@ -92,6 +92,11 @@
                 <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
             </intent-filter>
         </receiver>
+
+        <!-- About -->
+        <activity
+            android:name="org.jraf.android.util.about.AboutActivity"
+            android:label="@string/about_title" />
     </application>
 
 </manifest>
