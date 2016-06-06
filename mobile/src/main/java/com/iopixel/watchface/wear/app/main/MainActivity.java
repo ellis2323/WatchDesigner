@@ -20,6 +20,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Objects;
 import java.util.Set;
 
 import android.app.DownloadManager;
@@ -60,6 +61,7 @@ import com.iopixel.watchface.wear.app.main.grid.WatchfaceGridFragment;
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceContentValues;
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceSelection;
 import com.iopixel.watchface.wear.databinding.MainBinding;
+import com.iopixel.watchface.wear.library.FileUtil;
 import com.iopixel.watchface.wear.library.GWDReader;
 
 
@@ -87,7 +89,13 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
             // Called from the browser: start a download
             Uri uri = getIntent().getData();
             Log.d("uri=%s", uri);
+            Log.d("scheme=%s", uri.getScheme());
             String fileName = uri.getLastPathSegment();
+
+            if (uri.getScheme().compareTo("file")==0) {
+                loadLocalGWD(uri.getPath());
+                return;
+            }
 
             if (fileName == null) {
                 // Handle special case for gearfaces.com
@@ -378,4 +386,59 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
         startActivity(browserIntent);
     }
 
+    private static final String PREFIX = DownloadBroadcastReceiver.class.getName() + ".";
+    public static final String ACTION_SHOW_INFO = PREFIX + "ACTION_SHOW_INFO";
+    public static final String EXTRA_INFO_TEXT = PREFIX + "EXTRA_INFO_TEXT";
+
+    private void showInfo(Context context, String infoText) {
+        Intent intent = new Intent(ACTION_SHOW_INFO).putExtra(EXTRA_INFO_TEXT, infoText);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+    }
+
+    private void insert(Context context, File gwdFile, String watchfaceName) {
+        // First, deselect any previously selected watchface
+        WatchfaceContentValues values = new WatchfaceContentValues();
+        values.putIsSelected(false);
+        values.update(context, null);
+
+        // Now insert the new watchface
+        values.putDisplayName(watchfaceName);
+        String id = FileUtil.removeExtension(gwdFile);
+        values.putPublicId(id);
+        values.putInstallDate(System.currentTimeMillis());
+        values.putIsSelected(true);
+        values.insert(context);
+    }
+
+    private void loadLocalGWD(String path) {
+        String downloadedFilePath = path;
+        Log.d("downloadedFilePath=%s", downloadedFilePath);
+        // Copy the downloaded file to the storage
+        File downloadedFile = new File(downloadedFilePath);
+        String fileName = downloadedFile.getName();
+        File destination = Storage.getGwdStorageFile(this, fileName);
+        try {
+            org.jraf.android.util.file.FileUtil.copy(downloadedFile, destination);
+        } catch (IOException e) {
+            Log.w(e, "Could not copy file");
+            String infoText = getString(R.string.download_fail_install, fileName);
+            return;
+        }
+        // Extract icon and return watchface name
+        String watchfaceName = GWDReader.loadGWD(destination);
+        if (watchfaceName == null) {
+            Log.w("Could not extract the icon: give up");
+            return;
+        }
+
+        // Insert into content provider
+        insert(this, destination, watchfaceName);
+
+        // Send the file to the watch
+        Wear.sendAFile(destination);
+
+        // Success toast
+        String infoText = getString(R.string.download_success, fileName);
+        showInfo(this, infoText);
+    }
 }

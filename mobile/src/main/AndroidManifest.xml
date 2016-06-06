@@ -56,6 +56,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Generic .file filter -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="file" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern=".*\\.gwd" />
+                <data android:host="*" />
+            </intent-filter>
+
             <!-- Generic .gwd filter -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

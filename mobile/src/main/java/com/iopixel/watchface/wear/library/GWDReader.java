@@ -46,7 +46,7 @@ public class GWDReader {
      * @param gwdFile Gwd file to read.
      * @return The name of the watchface as declared in its manifest, or {@code null} if a problem occurred while extracting or parsing.
      */
-    @WorkerThread
+    //@WorkerThread
     @Nullable
     public static String loadGWD(File gwdFile) {
         String gwdName = "unknown";
