@@ -49,8 +49,15 @@ public class Storage {
     }
 
     public static File getGwdStorageFile(Context ctx) {
-        File gwdStorage = ctx.getExternalFilesDir(PATH_GWD);
-        return gwdStorage;
+        File result = null;
+        File[] files = ctx.getExternalFilesDirs(PATH_GWD);
+        for (File f: files) {
+            if (f.exists()) {
+                result = f;
+                break;
+            }
+        }
+        return result;
     }
 
     public static File getGwdStorageFile(Context ctx, String fileName) {
