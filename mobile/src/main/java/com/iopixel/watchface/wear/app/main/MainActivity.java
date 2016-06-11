@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Set;
 
+import android.Manifest;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -33,6 +34,7 @@ import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -65,7 +67,12 @@ import com.iopixel.watchface.wear.databinding.MainBinding;
 import com.iopixel.watchface.wear.library.GWDReader;
 import com.iopixel.watchface.wear.library.InstallUtil;
 
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.RuntimePermissions;
 
+@RuntimePermissions
 public class MainActivity extends AppCompatActivity implements WatchfaceCallbacks, ActionMode.Callback, AlertDialogListener {
     private static final int DIALOG_DELETE_CONFIRM = 0;
 
@@ -123,13 +130,11 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
             request.setVisibleInDownloadsUi(false);
             downloadManager.enqueue(request);
 
-            // Show a toast
+            // Show a snackbar
             Snackbar.make(mBinding.getRoot(), getString(R.string.main_download_started, fileName), Snackbar.LENGTH_LONG).show();
         } else if (ContentResolver.SCHEME_FILE.equalsIgnoreCase(scheme)) {
             // File case: use it directly
-            File file = new File(uri.getPath());
-            Log.d("file=%s", file);
-            InstallUtil.installExternalFile(this, file);
+            MainActivityPermissionsDispatcher.handleViewActionWithFileWithCheck(this, uri);
         } else if (ContentResolver.SCHEME_CONTENT.equalsIgnoreCase(scheme)) {
             InputStream inputStream;
             try {
@@ -142,6 +147,39 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
             InstallUtil.installInputStream(this, inputStream);
         }
     }
+
+    @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void handleViewActionWithFile(Uri uri) {
+        File file = new File(uri.getPath());
+        Log.d("file=%s", file);
+        InstallUtil.installExternalFile(this, file);
+    }
+
+
+    //
+    //region Permissions.
+    //
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // NOTE: delegate the permission handling to generated method
+        MainActivityPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
+    }
+
+    @OnPermissionDenied(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showDeniedForCamera() {
+        // Show a snackbar
+        Snackbar.make(mBinding.getRoot(), R.string.main_permissionDenied_readExternalStorage, Snackbar.LENGTH_LONG).show();
+    }
+
+    @OnNeverAskAgain(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showNeverAskForCamera() {
+        // Show a snackbar
+        Snackbar.make(mBinding.getRoot(), R.string.main_permissionDenied_readExternalStorage, Snackbar.LENGTH_LONG).show();
+    }
+
+    //endregion
 
 
     //

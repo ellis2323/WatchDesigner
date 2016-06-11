@@ -15,7 +15,7 @@
   limitations under the License.
   -->
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">Watchface</string>
+    <string name="app_name">WatchDesigner</string>
     <string name="main_download_started">Watchface %s download started…</string>
     <string name="main_watchface_empty">No watchfaces</string>
     <string name="main_set_success">Watchface set</string>
@@ -29,6 +29,7 @@
     </plurals>
     <string name="main_getWatchfaces"><u>Get watchfaces!</u></string>
     <string name="main_action_about">About</string>
+    <string name="main_permissionDenied_readExternalStorage">Could not open the file because the permission was denied</string>
 
     <string name="download_description">Watchface %s</string>
     <string name="download_fail_install">Could not install %s</string>
