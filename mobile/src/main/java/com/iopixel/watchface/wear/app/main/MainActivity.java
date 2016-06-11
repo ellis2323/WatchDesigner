@@ -16,15 +16,16 @@
 package com.iopixel.watchface.wear.app.main;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Objects;
 import java.util.Set;
 
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -47,6 +48,7 @@ import org.jraf.android.util.dialog.AlertDialogFragment;
 import org.jraf.android.util.dialog.AlertDialogListener;
 import org.jraf.android.util.io.IoUtil;
 import org.jraf.android.util.log.Log;
+import org.jraf.android.util.string.StringUtil;
 
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.devrel.wcl.WearManager;
@@ -56,13 +58,12 @@ import com.iopixel.library.Storage;
 import com.iopixel.library.Wear;
 import com.iopixel.watchface.wear.BuildConfig;
 import com.iopixel.watchface.wear.R;
-import com.iopixel.watchface.wear.app.download.DownloadBroadcastReceiver;
 import com.iopixel.watchface.wear.app.main.grid.WatchfaceGridFragment;
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceContentValues;
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceSelection;
 import com.iopixel.watchface.wear.databinding.MainBinding;
-import com.iopixel.watchface.wear.library.FileUtil;
 import com.iopixel.watchface.wear.library.GWDReader;
+import com.iopixel.watchface.wear.library.InstallUtil;
 
 
 public class MainActivity extends AppCompatActivity implements WatchfaceCallbacks, ActionMode.Callback, AlertDialogListener {
@@ -77,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("intent=%s", StringUtil.toString(getIntent()));
         mBinding = DataBindingUtil.setContentView(this, R.layout.main);
         WearManager.getInstance().addWearConsumer(mWearConsumer);
 
@@ -86,17 +88,23 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
         checkForBundledWatchfaces();
 
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
-            // Called from the browser: start a download
-            Uri uri = getIntent().getData();
-            Log.d("uri=%s", uri);
-            Log.d("scheme=%s", uri.getScheme());
+            // Called from link: start a download or use the provided file
+            handleViewAction(getIntent());
+
+            // Forget this action, to not trigger the download again when the activity is recreated
+            setIntent(getIntent().setAction(Intent.ACTION_MAIN));
+        }
+    }
+
+    private void handleViewAction(Intent intent) {
+        Uri uri = intent.getData();
+        Log.d("uri=%s", uri);
+        String scheme = uri.getScheme();
+        Log.d("scheme=%s", scheme);
+
+        if ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme)) {
+            // Download the file with the Download Manager - it will be installed when the download ends
             String fileName = uri.getLastPathSegment();
-
-            if (uri.getScheme().compareTo("file")==0) {
-                loadLocalGWD(uri.getPath());
-                return;
-            }
-
             if (fileName == null) {
                 // Handle special case for gearfaces.com
                 if (uri.toString().contains("wpdmdl")) {
@@ -116,20 +124,33 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
             downloadManager.enqueue(request);
 
             // Show a toast
-            Snackbar.make(mBinding.getRoot(), getString(R.string.main_download_started, fileName), Snackbar.LENGTH_SHORT).show();
-            // Forget this action, to not trigger the download again when the activity is recreated
-            setIntent(getIntent().setAction(Intent.ACTION_MAIN));
+            Snackbar.make(mBinding.getRoot(), getString(R.string.main_download_started, fileName), Snackbar.LENGTH_LONG).show();
+        } else if (ContentResolver.SCHEME_FILE.equalsIgnoreCase(scheme)) {
+            // File case: use it directly
+            File file = new File(uri.getPath());
+            Log.d("file=%s", file);
+            InstallUtil.installExternalFile(this, file);
+        } else if (ContentResolver.SCHEME_CONTENT.equalsIgnoreCase(scheme)) {
+            InputStream inputStream;
+            try {
+                inputStream = getContentResolver().openInputStream(uri);
+            } catch (FileNotFoundException e) {
+                Log.w(e, "Could not open %s", uri);
+                // Silently ignore
+                return;
+            }
+            InstallUtil.installInputStream(this, inputStream);
         }
     }
 
 
     //
-    //region Download info broadcast receiver.
+    //region Install info broadcast receiver.
     //
 
     private void registerInfoBroadcastReceiver() {
         if (!mInfoBroadcastReceiverRegistered) {
-            IntentFilter filter = new IntentFilter(DownloadBroadcastReceiver.ACTION_SHOW_INFO);
+            IntentFilter filter = new IntentFilter(InstallUtil.ACTION_SHOW_INFO);
             LocalBroadcastManager.getInstance(this).registerReceiver(mInfoBroadcastReceiver, filter);
             mInfoBroadcastReceiverRegistered = true;
         }
@@ -145,8 +166,8 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
     private BroadcastReceiver mInfoBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String infoText = intent.getStringExtra(DownloadBroadcastReceiver.EXTRA_INFO_TEXT);
-            Snackbar.make(mBinding.getRoot(), infoText, Snackbar.LENGTH_SHORT).show();
+            String infoText = intent.getStringExtra(InstallUtil.EXTRA_INFO_TEXT);
+            Snackbar.make(mBinding.getRoot(), infoText, Snackbar.LENGTH_LONG).show();
         }
     };
 
@@ -266,7 +287,7 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
                         Wear.sendAFile(gwdFile);
                     }
 
-                    Snackbar.make(mBinding.getRoot(), R.string.main_set_success, Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(mBinding.getRoot(), R.string.main_set_success, Snackbar.LENGTH_LONG).show();
                     break;
             }
         }
@@ -384,61 +405,5 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
     public void onGetWatchfacesClick(View view) {
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.url_getWatchfaces)));
         startActivity(browserIntent);
-    }
-
-    private static final String PREFIX = DownloadBroadcastReceiver.class.getName() + ".";
-    public static final String ACTION_SHOW_INFO = PREFIX + "ACTION_SHOW_INFO";
-    public static final String EXTRA_INFO_TEXT = PREFIX + "EXTRA_INFO_TEXT";
-
-    private void showInfo(Context context, String infoText) {
-        Intent intent = new Intent(ACTION_SHOW_INFO).putExtra(EXTRA_INFO_TEXT, infoText);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-    }
-
-    private void insert(Context context, File gwdFile, String watchfaceName) {
-        // First, deselect any previously selected watchface
-        WatchfaceContentValues values = new WatchfaceContentValues();
-        values.putIsSelected(false);
-        values.update(context, null);
-
-        // Now insert the new watchface
-        values.putDisplayName(watchfaceName);
-        String id = FileUtil.removeExtension(gwdFile);
-        values.putPublicId(id);
-        values.putInstallDate(System.currentTimeMillis());
-        values.putIsSelected(true);
-        values.insert(context);
-    }
-
-    private void loadLocalGWD(String path) {
-        String downloadedFilePath = path;
-        Log.d("downloadedFilePath=%s", downloadedFilePath);
-        // Copy the downloaded file to the storage
-        File downloadedFile = new File(downloadedFilePath);
-        String fileName = downloadedFile.getName();
-        File destination = Storage.getGwdStorageFile(this, fileName);
-        try {
-            org.jraf.android.util.file.FileUtil.copy(downloadedFile, destination);
-        } catch (IOException e) {
-            Log.w(e, "Could not copy file");
-            String infoText = getString(R.string.download_fail_install, fileName);
-            return;
-        }
-        // Extract icon and return watchface name
-        String watchfaceName = GWDReader.loadGWD(destination);
-        if (watchfaceName == null) {
-            Log.w("Could not extract the icon: give up");
-            return;
-        }
-
-        // Insert into content provider
-        insert(this, destination, watchfaceName);
-
-        // Send the file to the watch
-        Wear.sendAFile(destination);
-
-        // Success toast
-        String infoText = getString(R.string.download_success, fileName);
-        showInfo(this, infoText);
     }
 }

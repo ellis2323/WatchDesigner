@@ -56,18 +56,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Generic .file filter -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="file" />
-                <data android:mimeType="*/*" />
-                <data android:pathPattern=".*\\.gwd" />
-                <data android:host="*" />
-            </intent-filter>
-
-            <!-- Generic .gwd filter -->
+            <!-- Http/https filter -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -76,6 +65,22 @@
 
                 <data android:scheme="http" />
                 <data android:scheme="https" />
+
+                <data android:host="*" />
+                <data android:pathPattern=".*\\.gwd" />
+            </intent-filter>
+
+            <!-- File filter -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="file" />
+
+                <data android:mimeType="*/*" />
+
                 <data android:host="*" />
                 <data android:pathPattern=".*\\.gwd" />
             </intent-filter>
@@ -89,7 +94,22 @@
 
                 <data android:scheme="http" />
                 <data android:scheme="https" />
+
                 <data android:host="gearfaces.com" />
+                <data android:path="/" />
+            </intent-filter>
+
+            <!-- Specific filter for the 'Downloads' app -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data
+                    android:host="*"
+                    android:mimeType="application/octet-stream"
+                    android:scheme="content" />
             </intent-filter>
 
         </activity>
