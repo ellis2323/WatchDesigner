@@ -156,9 +156,9 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
     }
 
 
-    //
-    //region Permissions.
-    //
+    // -------------------------------------------------------------------------
+    // region Permissions.
+    // -------------------------------------------------------------------------
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -182,9 +182,9 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
     //endregion
 
 
-    //
-    //region Install info broadcast receiver.
-    //
+    // -------------------------------------------------------------------------
+    // region Install info broadcast receiver.
+    // -------------------------------------------------------------------------
 
     private void registerInfoBroadcastReceiver() {
         if (!mInfoBroadcastReceiverRegistered) {
@@ -209,12 +209,12 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
         }
     };
 
-    //endregion
+    // endregion
 
 
-    //
-    //region Menu.
-    //
+    // -------------------------------------------------------------------------
+    // region Menu.
+    // -------------------------------------------------------------------------
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -323,9 +323,15 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
                         // File not present: send it now
                         File gwdFile = Storage.getGwdFile(MainActivity.this, mGwdToSendPublicId);
                         Wear.sendAFile(gwdFile);
+                    } else {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Snackbar.make(mBinding.getRoot(), R.string.main_set_success, Snackbar.LENGTH_LONG).show();
+                                getWatchfaceGridFragment().setSendingPublicId(null);
+                            }
+                        });
                     }
-
-                    Snackbar.make(mBinding.getRoot(), R.string.main_set_success, Snackbar.LENGTH_LONG).show();
                     break;
             }
         }
@@ -339,13 +345,18 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
     }
 
 
-    //
-    //region WatchfaceCallbacks.
-    //
+    // -------------------------------------------------------------------------
+    // region WatchfaceCallbacks.
+    // -------------------------------------------------------------------------
 
     @Override
     public void onWatchfaceClick(String publicId) {
+        // Show sending indicator on grid
+        getWatchfaceGridFragment().setSendingPublicId(publicId);
+
+        // Save the id for later
         mGwdToSendPublicId = publicId;
+
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
@@ -361,6 +372,7 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
 
                 // Ask the watch to set the watchface
                 Wear.sendMessage(Wear.PATH_MESSAGE_SET_GWD_REQUEST, mGwdToSendPublicId);
+
                 return null;
             }
         }.execute();
@@ -381,9 +393,9 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
     //endregion
 
 
-    //
-    //region ActionMode.Callback.
-    //
+    // -------------------------------------------------------------------------
+    // region ActionMode.Callback.
+    // -------------------------------------------------------------------------
 
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -422,9 +434,9 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
     //endregion
 
 
-    //
-    //region AlertDialogListener.
-    //
+    // -------------------------------------------------------------------------
+    // region AlertDialogListener.
+    // -------------------------------------------------------------------------
 
     @Override
     public void onDialogClickPositive(int tag, Object payload) {

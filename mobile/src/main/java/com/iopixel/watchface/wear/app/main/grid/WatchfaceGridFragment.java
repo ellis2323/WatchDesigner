@@ -42,7 +42,10 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
     private WatchfaceGridBinding mBinding;
     private WatchfaceGridAdapter mAdapter;
     private GridLayoutManager mLayoutManager;
+    @Nullable
     private Set<Long> mSelection;
+    @Nullable
+    private String mSendingPublicId;
 
     @Nullable
     @Override
@@ -84,20 +87,24 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             mSelection = (Set<Long>) savedInstanceState.getSerializable("selection");
+            mSendingPublicId = savedInstanceState.getString("sendingPublicId");
         }
         getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        if (mAdapter != null && !mAdapter.getSelection().isEmpty()) {
-            outState.putSerializable("selection", (Serializable) mAdapter.getSelection());
+        if (mAdapter != null) {
+            if (!mAdapter.getSelection().isEmpty()) outState.putSerializable("selection", (Serializable) mAdapter.getSelection());
+            outState.putString("sendingPublicId", mSendingPublicId);
         }
         super.onSaveInstanceState(outState);
     }
 
 
-    //region Loaders.
+    // -------------------------------------------------------------------------
+    // region Loaders.
+    // -------------------------------------------------------------------------
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -113,6 +120,8 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
             if (mSelection != null) {
                 mAdapter.setSelection(mSelection);
             }
+            // Restore sending id
+            if (mSendingPublicId != null) mAdapter.setSendingPublicId(mSendingPublicId);
         }
         boolean empty = data.getCount() == 0;
         if (empty) {
@@ -130,7 +139,7 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
         mAdapter.setCursor(null);
     }
 
-    //endregion
+    // endregion
 
 
     public void stopSelectionMode() {
@@ -143,5 +152,10 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
 
     public void reload() {
         mAdapter.notifyDataSetChanged();
+    }
+
+    public void setSendingPublicId(@Nullable String sendingPublicId) {
+        mSendingPublicId = sendingPublicId;
+        if (mAdapter != null) mAdapter.setSendingPublicId(sendingPublicId);
     }
 }

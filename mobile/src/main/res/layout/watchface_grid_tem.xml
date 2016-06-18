@@ -39,6 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
+        android:enabled="@{!adapter.hasSendingPublicId}"
         android:padding="@{@dimen/watchface_grid_item_inter_padding / 2}">
 
         <android.support.v7.widget.CardView
@@ -59,13 +60,24 @@
                 android:orientation="vertical"
                 android:padding="@dimen/watchface_grid_item_padding">
 
-                <!-- Preview -->
-                <ImageView
-                    android:id="@+id/imgPreview"
-                    android:layout_width="@dimen/watchface_grid_item_preview_width"
-                    android:layout_height="@dimen/watchface_grid_item_preview_width"
-                    app:iconFile="@{cursor.publicId}"
-                    tools:background="#888" />
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <!-- Preview -->
+                    <ImageView
+                        android:id="@+id/imgPreview"
+                        android:layout_width="@dimen/watchface_grid_item_preview_width"
+                        android:layout_height="@dimen/watchface_grid_item_preview_width"
+                        app:iconFile="@{cursor.publicId}"
+                        tools:background="#888" />
+
+                    <!-- Sending indicator -->
+                    <ProgressBar
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        app:visible="@{adapter.isSending(cursor.publicId)}" />
+                </FrameLayout>
 
                 <!-- Name -->
                 <TextView

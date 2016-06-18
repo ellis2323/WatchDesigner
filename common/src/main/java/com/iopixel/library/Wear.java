@@ -72,6 +72,7 @@ public class Wear {
         }
         if (!file.exists()) {
             Log.w("Trying to send a non existing file: give up - %s", file);
+            return;
         }
         WearFileTransfer wearFileTransfer = new WearFileTransfer.Builder(firstNode).setTargetName(file.getName()).setFile(file).setOnFileTransferResultListener(
                 new WearFileTransfer.OnFileTransferRequestListener() {

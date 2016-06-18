@@ -88,6 +88,9 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
             if (sEngine != null) {
                 sEngine.invalidate();
             }
+
+            // Reply OK
+            Wear.sendMessage(Wear.PATH_MESSAGE_SET_GWD_REPLY, Wear.DATA_OK);
         }
 
         @Override

@@ -69,6 +69,8 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
     private WatchfaceCursor mCursor;
     private boolean mSelectionMode;
     private Set<Long> mSelection = new HashSet<>(10);
+    @Nullable
+    private String mSendingPublicId;
 
     public WatchfaceGridAdapter(Context context, WatchfaceCallbacks callbacks) {
         mContext = context;
@@ -126,7 +128,7 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
         return mCursor.getId();
     }
 
-    public void setCursor(Cursor cursor) {
+    public void setCursor(@Nullable Cursor cursor) {
         mCursor = cursor == null ? null : new WatchfaceCursor(cursor);
         notifyDataSetChanged();
     }
@@ -142,6 +144,9 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
             if (mSelectionMode) {
                 // Disallow selecting bundled watchfaces
                 if (mCursor.getIsBundled()) return;
+
+                // Disallow selecting selected watchface
+                if (mCursor.getIsSelected()) return;
 
                 // Toggle selected state for this item
                 Set<Long> oldSelection = new HashSet<>(mSelection);
@@ -161,6 +166,10 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
 
                 notifyItemChanged(position, new Payload(oldSelection, mSelection));
             } else {
+                if (mCursor.getIsSelected()) {
+                    // Already selected: do nothing
+                    return;
+                }
                 mCallbacks.onWatchfaceClick(publicId);
             }
         }
@@ -177,10 +186,11 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
                 assert mCursor != null;
                 mCursor.moveToPosition(position);
 
-                if (mCursor.getIsBundled()) {
-                    // Do not do anything for bundled watchfaces
-                    return true;
-                }
+                // Disallow selecting bundled watchfaces
+                if (mCursor.getIsBundled()) return true;
+
+                // Disallow selecting selected watchface
+                if (mCursor.getIsSelected()) return true;
 
                 // Switch to selection mode
                 mSelectionMode = true;
@@ -198,6 +208,10 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
             return true;
         }
     };
+
+    // -------------------------------------------------------------------------
+    // region Selection.
+    // -------------------------------------------------------------------------
 
     public boolean isSelectionMode() {
         return mSelectionMode;
@@ -226,4 +240,27 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
         mSelection.clear();
         notifyItemRangeChanged(0, getItemCount(), new Payload(oldSelection, mSelection));
     }
+
+    // endregion
+
+
+    // -------------------------------------------------------------------------
+    // region Sending.
+    // -------------------------------------------------------------------------
+
+    public boolean isSending(String publicId) {
+        return publicId.equals(mSendingPublicId);
+    }
+
+    public boolean hasSendingPublicId() {
+        return mSendingPublicId != null;
+    }
+
+    public void setSendingPublicId(@Nullable String sendingPublicId) {
+        mSendingPublicId = sendingPublicId;
+        notifyDataSetChanged();
+    }
+
+    // endregion
+
 }
