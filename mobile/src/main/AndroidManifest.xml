@@ -111,6 +111,11 @@
                     android:host="*"
                     android:mimeType="application/octet-stream"
                     android:scheme="content" />
+
+                <data
+                    android:host="*"
+                    android:mimeType="unknown/gwd"
+                    android:scheme="content" />
             </intent-filter>
 
         </activity>
