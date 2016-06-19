@@ -31,6 +31,7 @@ import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Keep;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
@@ -156,17 +157,17 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
         InstallUtil.installExternalFile(this, file);
     }
 
-    @Subscribe
+    @Subscribe @Keep
     public void onDownloadFailedEvent(DownloadFailedEvent evt) {
         showSnackbar(getString(R.string.download_fail, evt.fileName));
     }
 
-    @Subscribe
+    @Subscribe @Keep
     public void onInstallFailedEvent(InstallFailedEvent evt) {
         showSnackbar(getString(R.string.install_fail, evt.fileName));
     }
 
-    @Subscribe
+    @Subscribe @Keep
     public void onInstalSuccessEvent(InstallSuccessEvent evt) {
         getWatchfaceGridFragment().setSendingPublicId(evt.publicId);
     }

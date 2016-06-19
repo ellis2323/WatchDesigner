@@ -68,6 +68,13 @@ public class GWDReader {
                         gwdName = element.getAttribute("name");
                         Log.i("name: %s", gwdName);
                     }
+                } else if (ze.getName().startsWith("res/") && ze.getName().endsWith("_last.png")) {
+                    String iconName = FileUtil.removeExtension(gwdFile) + ".png";
+                    // icon name
+                    Log.i("icon: ||%s||", iconName);
+                    File iconPath = new File(gwdFile.getParent(), iconName);
+                    // write into file with filename_of_gwd.png (we removed the .gwd)
+                    extractFile(zis, iconPath);
                 } else if (ze.getName().startsWith("shared/res/") && ze.getName().endsWith(".png")) {
                     String iconName = FileUtil.removeExtension(gwdFile) + ".png";
                     // icon name
