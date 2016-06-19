@@ -25,18 +25,15 @@ import java.util.Set;
 
 import android.Manifest;
 import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.view.Menu;
@@ -44,6 +41,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.jraf.android.util.about.AboutActivityIntentBuilder;
 import org.jraf.android.util.async.TaskFragment;
 import org.jraf.android.util.dialog.AlertDialogFragment;
@@ -60,16 +59,18 @@ import com.iopixel.library.Storage;
 import com.iopixel.library.Wear;
 import com.iopixel.watchface.wear.BuildConfig;
 import com.iopixel.watchface.wear.R;
+import com.iopixel.watchface.wear.app.download.DownloadFailedEvent;
 import com.iopixel.watchface.wear.app.main.grid.WatchfaceGridFragment;
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceContentValues;
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceSelection;
 import com.iopixel.watchface.wear.databinding.MainBinding;
 import com.iopixel.watchface.wear.library.GWDReader;
+import com.iopixel.watchface.wear.library.InstallFailedEvent;
+import com.iopixel.watchface.wear.library.InstallSuccessEvent;
 import com.iopixel.watchface.wear.library.InstallUtil;
 
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
-import permissions.dispatcher.OnPermissionDenied;
 import permissions.dispatcher.RuntimePermissions;
 
 @RuntimePermissions
@@ -80,7 +81,6 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
     private String mGwdToSendPublicId;
     ActionMode mActionMode;
     private WatchfaceGridFragment mWatchfaceGridFragment;
-    private boolean mInfoBroadcastReceiverRegistered;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
         mBinding = DataBindingUtil.setContentView(this, R.layout.main);
         WearManager.getInstance().addWearConsumer(mWearConsumer);
 
-        registerInfoBroadcastReceiver();
+        EventBus.getDefault().register(this);
 
         // Check if the bundled watchfaces are installed (first time case)
         checkForBundledWatchfaces();
@@ -126,16 +126,17 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
             DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
             DownloadManager.Request request = new DownloadManager.Request(uri);
             request.setTitle(getString(R.string.app_name));
-            request.setDescription(getString(R.string.download_description, fileName));
+            request.setDescription(fileName);
             request.setVisibleInDownloadsUi(false);
             downloadManager.enqueue(request);
 
             // Show a snackbar
-            Snackbar.make(mBinding.getRoot(), getString(R.string.main_download_started, fileName), Snackbar.LENGTH_LONG).show();
+            showSnackbar(getString(R.string.main_download_started, fileName));
         } else if (ContentResolver.SCHEME_FILE.equalsIgnoreCase(scheme)) {
             // File case: use it directly
             MainActivityPermissionsDispatcher.handleViewActionWithFileWithCheck(this, uri);
         } else if (ContentResolver.SCHEME_CONTENT.equalsIgnoreCase(scheme)) {
+            // ContentProvider case (e.g. the Downloads app)
             InputStream inputStream;
             try {
                 inputStream = getContentResolver().openInputStream(uri);
@@ -155,6 +156,21 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
         InstallUtil.installExternalFile(this, file);
     }
 
+    @Subscribe
+    public void onDownloadFailedEvent(DownloadFailedEvent evt) {
+        showSnackbar(getString(R.string.download_fail, evt.fileName));
+    }
+
+    @Subscribe
+    public void onInstallFailedEvent(InstallFailedEvent evt) {
+        showSnackbar(getString(R.string.install_fail, evt.fileName));
+    }
+
+    @Subscribe
+    public void onInstalSuccessEvent(InstallSuccessEvent evt) {
+        getWatchfaceGridFragment().setSendingPublicId(evt.publicId);
+    }
+
 
     // -------------------------------------------------------------------------
     // region Permissions.
@@ -167,49 +183,13 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
         MainActivityPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
     }
 
-    @OnPermissionDenied(Manifest.permission.READ_EXTERNAL_STORAGE)
-    void showDeniedForCamera() {
-        // Show a snackbar
-        Snackbar.make(mBinding.getRoot(), R.string.main_permissionDenied_readExternalStorage, Snackbar.LENGTH_LONG).show();
-    }
-
     @OnNeverAskAgain(Manifest.permission.READ_EXTERNAL_STORAGE)
-    void showNeverAskForCamera() {
+    void showNeverAskPermission() {
         // Show a snackbar
-        Snackbar.make(mBinding.getRoot(), R.string.main_permissionDenied_readExternalStorage, Snackbar.LENGTH_LONG).show();
+        showSnackbar(R.string.main_permissionDenied_readExternalStorage);
     }
 
     //endregion
-
-
-    // -------------------------------------------------------------------------
-    // region Install info broadcast receiver.
-    // -------------------------------------------------------------------------
-
-    private void registerInfoBroadcastReceiver() {
-        if (!mInfoBroadcastReceiverRegistered) {
-            IntentFilter filter = new IntentFilter(InstallUtil.ACTION_SHOW_INFO);
-            LocalBroadcastManager.getInstance(this).registerReceiver(mInfoBroadcastReceiver, filter);
-            mInfoBroadcastReceiverRegistered = true;
-        }
-    }
-
-    private void unregisterInfoBroadcastReceiver() {
-        if (mInfoBroadcastReceiverRegistered) {
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(mInfoBroadcastReceiver);
-            mInfoBroadcastReceiverRegistered = false;
-        }
-    }
-
-    private BroadcastReceiver mInfoBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String infoText = intent.getStringExtra(InstallUtil.EXTRA_INFO_TEXT);
-            Snackbar.make(mBinding.getRoot(), infoText, Snackbar.LENGTH_LONG).show();
-        }
-    };
-
-    // endregion
 
 
     // -------------------------------------------------------------------------
@@ -307,7 +287,7 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
     @Override
     protected void onDestroy() {
         WearManager.getInstance().removeWearConsumer(mWearConsumer);
-        unregisterInfoBroadcastReceiver();
+        EventBus.getDefault().unregister(this);
         super.onDestroy();
     }
 
@@ -327,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Snackbar.make(mBinding.getRoot(), R.string.main_set_success, Snackbar.LENGTH_LONG).show();
+                                showSnackbar(R.string.main_set_success);
                                 getWatchfaceGridFragment().setSendingPublicId(null);
                             }
                         });
@@ -456,4 +436,13 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.url_getWatchfaces)));
         startActivity(browserIntent);
     }
+
+    private void showSnackbar(@StringRes int messageResId) {
+        Snackbar.make(mBinding.getRoot(), messageResId, Snackbar.LENGTH_LONG).show();
+    }
+
+    private void showSnackbar(String message) {
+        Snackbar.make(mBinding.getRoot(), message, Snackbar.LENGTH_LONG).show();
+    }
+
 }

@@ -22,59 +22,45 @@ import java.io.InputStream;
 import java.util.Locale;
 
 import android.content.Context;
-import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 
+import org.greenrobot.eventbus.EventBus;
 import org.jraf.android.util.io.IoUtil;
 import org.jraf.android.util.log.Log;
 
 import com.iopixel.library.Storage;
 import com.iopixel.library.Wear;
-import com.iopixel.watchface.wear.R;
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceContentValues;
 import com.iopixel.watchface.wear.prefs.MainPrefs;
 
 public class InstallUtil {
-    private static final String PREFIX = InstallUtil.class.getName() + ".";
-    public static final String ACTION_SHOW_INFO = PREFIX + "ACTION_SHOW_INFO";
-    public static final String EXTRA_INFO_TEXT = PREFIX + "EXTRA_INFO_TEXT";
-
-    public static void showInfo(Context context, String infoText) {
-        Intent intent = new Intent(ACTION_SHOW_INFO).putExtra(EXTRA_INFO_TEXT, infoText);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-    }
-
     public static void installExternalFile(Context context, File externalFile) {
         String fileName = externalFile.getName();
-        File destinationFile = Storage.getGwdStorageFile(context, fileName);
+        File gwdStorageFile = Storage.getGwdStorageFile(context, fileName);
         try {
-            org.jraf.android.util.file.FileUtil.copy(externalFile, destinationFile);
+            org.jraf.android.util.file.FileUtil.copy(externalFile, gwdStorageFile);
         } catch (IOException e) {
             Log.w(e, "Could not copy file");
-            String infoText = context.getString(R.string.download_fail_install, fileName);
-            showInfo(context, infoText);
+            EventBus.getDefault().post(new InstallFailedEvent(InstallFailedEvent.Reason.CANNOT_COPY_TO_GWD_STORAGE, fileName));
             return;
         }
-        installInternalFile(context, fileName, destinationFile);
+        installGwdStorageFile(context, fileName, gwdStorageFile);
     }
 
     public static void installInputStream(Context context, InputStream inputStream) {
         String fileName = getUniqueFileName(context);
-
-        File destinationFile = Storage.getGwdStorageFile(context, fileName);
+        File gwdStorageFile = Storage.getGwdStorageFile(context, fileName);
         FileOutputStream fileOutputStream = null;
         try {
-            fileOutputStream = new FileOutputStream(destinationFile);
+            fileOutputStream = new FileOutputStream(gwdStorageFile);
             IoUtil.copy(inputStream, fileOutputStream);
         } catch (IOException e) {
             Log.w(e, "Could not copy input");
-            String infoText = context.getString(R.string.download_fail_install, fileName);
-            showInfo(context, infoText);
+            EventBus.getDefault().post(new InstallFailedEvent(InstallFailedEvent.Reason.CANNOT_COPY_TO_GWD_STORAGE, fileName));
             return;
         } finally {
             IoUtil.closeSilently(inputStream, fileOutputStream);
         }
-        installInternalFile(context, fileName, destinationFile);
+        installGwdStorageFile(context, fileName, gwdStorageFile);
     }
 
     private static String getUniqueFileName(Context context) {
@@ -84,28 +70,25 @@ public class InstallUtil {
         return String.format(Locale.US, "watchface-%d.gwd", uniqueId);
     }
 
-    private static void installInternalFile(Context context, String fileName, File destination) {
+    private static void installGwdStorageFile(Context context, String fileName, File gwdStorageFile) {
         // Extract icon and return watchface name
-        String watchfaceName = GWDReader.loadGWD(destination);
+        String watchfaceName = GWDReader.loadGWD(gwdStorageFile);
         if (watchfaceName == null) {
             Log.w("Could not extract the watchface name: give up");
-            String infoText = context.getString(R.string.download_fail_extract, fileName);
-            showInfo(context, infoText);
+            EventBus.getDefault().post(new InstallFailedEvent(InstallFailedEvent.Reason.CANNOT_READ_GWD, fileName));
             return;
         }
 
         // Insert into content provider
-        insert(context, destination, watchfaceName);
+        String publicId = insert(context, gwdStorageFile, watchfaceName);
 
         // Send the file to the watch
-        Wear.sendAFile(destination);
+        Wear.sendAFile(gwdStorageFile);
 
-        // Success toast
-        String infoText = context.getString(R.string.download_success, fileName);
-        showInfo(context, infoText);
+        EventBus.getDefault().post(new InstallSuccessEvent(publicId));
     }
 
-    private static void insert(Context context, File gwdFile, String watchfaceName) {
+    private static String insert(Context context, File gwdFile, String watchfaceName) {
         // First, deselect any previously selected watchface
         WatchfaceContentValues values = new WatchfaceContentValues();
         values.putIsSelected(false);
@@ -113,10 +96,12 @@ public class InstallUtil {
 
         // Now insert the new watchface
         values.putDisplayName(watchfaceName);
-        String id = FileUtil.removeExtension(gwdFile);
-        values.putPublicId(id);
+        String publicId = FileUtil.removeExtension(gwdFile);
+        values.putPublicId(publicId);
         values.putInstallDate(System.currentTimeMillis());
         values.putIsSelected(true);
         values.insert(context);
+
+        return publicId;
     }
 }

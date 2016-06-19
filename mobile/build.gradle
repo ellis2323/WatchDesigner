@@ -135,6 +135,7 @@ dependencies {
 //    compile 'org.zeroturnaround:zt-zip:1.9'
     compile 'com.github.hotchemi:permissionsdispatcher:2.1.3'
     apt 'com.github.hotchemi:permissionsdispatcher-processor:2.1.3'
+    compile 'org.greenrobot:eventbus:3.0.0'
 
     // Bundle the wear app inside this one
     wearApp project(':wear')

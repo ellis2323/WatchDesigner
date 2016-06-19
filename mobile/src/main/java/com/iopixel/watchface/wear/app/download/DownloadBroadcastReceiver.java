@@ -25,10 +25,10 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.support.annotation.WorkerThread;
 
+import org.greenrobot.eventbus.EventBus;
 import org.jraf.android.util.log.Log;
 import org.jraf.android.util.log.LogUtil;
 
-import com.iopixel.watchface.wear.R;
 import com.iopixel.watchface.wear.library.InstallUtil;
 
 public class DownloadBroadcastReceiver extends BroadcastReceiver {
@@ -59,10 +59,10 @@ public class DownloadBroadcastReceiver extends BroadcastReceiver {
             cursor.moveToFirst();
             int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
             Log.d("status=%s", LogUtil.getConstantName(DownloadManager.class, status, "STATUS"));
-            String description = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_DESCRIPTION));
+            String fileName = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_DESCRIPTION));
             switch (status) {
                 case DownloadManager.STATUS_FAILED:
-                    onFail(context, description);
+                    onFail(fileName);
                     break;
 
                 case DownloadManager.STATUS_SUCCESSFUL:
@@ -75,10 +75,9 @@ public class DownloadBroadcastReceiver extends BroadcastReceiver {
         }
     }
 
-    private void onFail(Context context, String description) {
-        Log.d("description=%s", description);
-        String infoText = context.getString(R.string.download_fail_download, description);
-        InstallUtil.showInfo(context, infoText);
+    private void onFail(String fileName) {
+        Log.d("fileName=%s", fileName);
+        EventBus.getDefault().post(new DownloadFailedEvent(fileName));
     }
 
     private void onSuccess(Context context, String downloadedFilePath) {
