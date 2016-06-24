@@ -82,6 +82,13 @@ public class GWDReader {
                     File iconPath = new File(gwdFile.getParent(), iconName);
                     // write into file with filename_of_gwd.png (we removed the .gwd)
                     extractFile(zis, iconPath);
+                } else if (ze.getName().contentEquals("icon.png")) {
+                    String iconName = FileUtil.removeExtension(gwdFile) + ".png";
+                    // icon name
+                    Log.i("icon: ||%s||", iconName);
+                    File iconPath = new File(gwdFile.getParent(), iconName);
+                    // write into file with filename_of_gwd.png (we removed the .gwd)
+                    extractFile(zis, iconPath);
                 }
             }
         } catch (Exception e) {
