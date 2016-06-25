@@ -71,11 +71,15 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
     private Set<Long> mSelection = new HashSet<>(10);
     @Nullable
     private String mSendingPublicId;
+    private final float mScaleSelected;
+    private final float mScaleNormal;
 
     public WatchfaceGridAdapter(Context context, WatchfaceCallbacks callbacks) {
         mContext = context;
         mCallbacks = callbacks;
         mLayoutInflater = LayoutInflater.from(mContext);
+        mScaleSelected = mContext.getResources().getFraction(R.fraction.watchface_grid_item_scale_selected, 1, 1);
+        mScaleNormal = mContext.getResources().getFraction(R.fraction.watchface_grid_item_scale_normal, 1, 1);
         setHasStableIds(true);
     }
 
@@ -104,13 +108,13 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
         if (!payloads.isEmpty()) {
             Payload payload = (Payload) payloads.get(0);
             if (payload.hasBeenSelected(holder.getItemId())) {
-                holder.binding.conCard.setScaleX(1f);
-                holder.binding.conCard.setScaleY(1f);
-                holder.binding.conCard.animate().scaleX(.85f).scaleY(.85f).setDuration(150);
+                holder.binding.conCard.setScaleX(mScaleNormal);
+                holder.binding.conCard.setScaleY(mScaleNormal);
+                holder.binding.conCard.animate().scaleX(mScaleSelected).scaleY(mScaleSelected).setDuration(150);
             } else if (payload.hasBeenDeselected(holder.getItemId())) {
-                holder.binding.conCard.setScaleX(.85f);
-                holder.binding.conCard.setScaleY(.85f);
-                holder.binding.conCard.animate().scaleX(1f).scaleY(1f).setDuration(150);
+                holder.binding.conCard.setScaleX(mScaleSelected);
+                holder.binding.conCard.setScaleY(mScaleSelected);
+                holder.binding.conCard.animate().scaleX(mScaleNormal).scaleY(mScaleNormal).setDuration(150);
             }
         }
     }
