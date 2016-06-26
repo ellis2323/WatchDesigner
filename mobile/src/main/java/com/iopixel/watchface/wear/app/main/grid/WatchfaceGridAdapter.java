@@ -73,6 +73,7 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
     private String mSendingPublicId;
     private final float mScaleSelected;
     private final float mScaleNormal;
+    private boolean mEnabled;
 
     public WatchfaceGridAdapter(Context context, WatchfaceCallbacks callbacks) {
         mContext = context;
@@ -267,4 +268,13 @@ public class WatchfaceGridAdapter extends RecyclerView.Adapter<WatchfaceGridAdap
 
     // endregion
 
+
+    public void setEnabled(boolean enabled) {
+        mEnabled = enabled;
+        notifyDataSetChanged();
+    }
+
+    public boolean isEnabled() {
+        return mEnabled;
+    }
 }

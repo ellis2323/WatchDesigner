@@ -17,13 +17,13 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <TextView
-        android:id="@+id/txtGetWatchfaces"
+        android:id="@+id/txtCaption"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:background="@color/snackbar_bg"
         android:elevation="6dp"
         android:gravity="center_vertical"
-        android:onClick="onGetWatchfacesClick"
+        android:onClick="onPersistentSnackbarClick"
         android:paddingLeft="24dp"
         android:paddingRight="24dp"
         android:text="@string/main_getWatchfaces"

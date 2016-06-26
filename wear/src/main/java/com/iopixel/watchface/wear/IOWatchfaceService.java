@@ -161,12 +161,19 @@ public class IOWatchfaceService extends Gles2WatchFaceService {
     public Engine onCreateEngine() {
         WearManager.getInstance().addWearConsumer(mWearConsumer);
         sEngine = new Engine();
+
+        // Inform the mobile that the watchface has been set
+        Wear.sendMessage(Wear.PATH_MESSAGE_CHECK_WF_SET_REPLY, Wear.DATA_OK);
+
         return sEngine;
     }
 
     @Override
     public void onDestroy() {
         WearManager.getInstance().removeWearConsumer(mWearConsumer);
+        sEngine = null;
+        // Inform the mobile that the watchface has been unset
+        Wear.sendMessage(Wear.PATH_MESSAGE_CHECK_WF_SET_REPLY, Wear.DATA_KO);
         super.onDestroy();
     }
 

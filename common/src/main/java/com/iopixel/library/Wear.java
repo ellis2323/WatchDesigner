@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Set;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import org.jraf.android.util.log.Log;
@@ -38,10 +39,17 @@ public class Wear {
     private static final String PATH_MESSAGE_SUFFIX_REQUEST = "/req";
     private static final String PATH_MESSAGE_SUFFIX_REPLY = "/repl";
 
-    public static final String PATH_MESSAGE_SET_GWD_REQUEST = PATH_MESSAGE_PREFIX + "setGwd" + PATH_MESSAGE_SUFFIX_REQUEST;
-    public static final String PATH_MESSAGE_SET_GWD_REPLY = PATH_MESSAGE_PREFIX + "setGwd" + PATH_MESSAGE_SUFFIX_REPLY;
-    public static final String PATH_MESSAGE_DELETE_GWDS_REQUEST = PATH_MESSAGE_PREFIX + "deleteGwds" + PATH_MESSAGE_SUFFIX_REQUEST;
-    public static final String PATH_MESSAGE_DELETE_GWDS_REPLY = PATH_MESSAGE_PREFIX + "deleteGwds" + PATH_MESSAGE_SUFFIX_REPLY;
+    private static final String PATH_MESSAGE_SET_GWD = "setGwd";
+    public static final String PATH_MESSAGE_SET_GWD_REQUEST = PATH_MESSAGE_PREFIX + PATH_MESSAGE_SET_GWD + PATH_MESSAGE_SUFFIX_REQUEST;
+    public static final String PATH_MESSAGE_SET_GWD_REPLY = PATH_MESSAGE_PREFIX + PATH_MESSAGE_SET_GWD + PATH_MESSAGE_SUFFIX_REPLY;
+
+    private static final String PATH_MESSAGE_DELETE_GWDS = "deleteGwds";
+    public static final String PATH_MESSAGE_DELETE_GWDS_REQUEST = PATH_MESSAGE_PREFIX + PATH_MESSAGE_DELETE_GWDS + PATH_MESSAGE_SUFFIX_REQUEST;
+    public static final String PATH_MESSAGE_DELETE_GWDS_REPLY = PATH_MESSAGE_PREFIX + PATH_MESSAGE_DELETE_GWDS + PATH_MESSAGE_SUFFIX_REPLY;
+
+    private static final String PATH_MESSAGE_CHECK_WF_SET = "checkWatchfaceSet";
+    public static final String PATH_MESSAGE_CHECK_WF_SET_REQUEST = PATH_MESSAGE_PREFIX + PATH_MESSAGE_CHECK_WF_SET + PATH_MESSAGE_SUFFIX_REQUEST;
+    public static final String PATH_MESSAGE_CHECK_WF_SET_REPLY = PATH_MESSAGE_PREFIX + PATH_MESSAGE_CHECK_WF_SET + PATH_MESSAGE_SUFFIX_REPLY;
 
     public static final byte[] DATA_OK = {0};
     public static final byte[] DATA_KO = {1};
@@ -85,7 +93,7 @@ public class Wear {
         wearFileTransfer.startTransfer();
     }
 
-    public static void sendMessage(String path, byte[] data) {
+    public static void sendMessage(String path, @Nullable byte[] data) {
         Node firstNode = getFirstNode();
         if (firstNode == null) {
             Log.d("Could not find any nearby nodes: give up");
@@ -94,7 +102,11 @@ public class Wear {
         WearManager.getInstance().sendMessage(firstNode.getId(), path, data);
     }
 
-    public static void sendMessage(String path, String data) {
+    public static void sendMessage(String path) {
+        sendMessage(path, (byte[]) null);
+    }
+
+    public static void sendMessage(String path, @NonNull String data) {
         byte[] dataBytes = null;
         try {
             dataBytes = data.getBytes("utf-8");
@@ -102,7 +114,7 @@ public class Wear {
         sendMessage(path, dataBytes);
     }
 
-    public static void sendMessage(String path, Serializable data) {
+    public static void sendMessage(String path, @NonNull Serializable data) {
         byte[] dataBytes = null;
         dataBytes = SerializableUtil.serialize(data);
         sendMessage(path, dataBytes);

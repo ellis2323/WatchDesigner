@@ -34,7 +34,9 @@
                 android:layout_weight="1"
                 tools:layout="@layout/watchface_grid" />
 
-            <include layout="@layout/main_get_watchfaces" />
+            <include
+                android:id="@+id/conPersistentSnackbar"
+                layout="@layout/main_persistent_snackbar" />
         </LinearLayout>
 
         <FrameLayout

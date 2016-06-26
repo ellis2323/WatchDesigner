@@ -22,9 +22,11 @@ import android.app.Application;
 import org.jraf.android.util.log.Log;
 import org.jraf.android.util.log.LogUtil;
 
+import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableStatusCodes;
 import com.google.devrel.wcl.WearManager;
 import com.google.devrel.wcl.callbacks.AbstractWearConsumer;
+import com.iopixel.library.Wear;
 
 public class WearApplication extends Application {
     private static final String TAG = "WatchDesigner";
@@ -45,6 +47,15 @@ public class WearApplication extends Application {
                 String statusCodeStr = LogUtil.getConstantName(WearableStatusCodes.class, statusCode);
                 Log.d("statusCode=%s requestId=%s savedFile=%s originalName=%s", statusCodeStr, requestId, savedFile, originalName);
                 Log.d("File size=%d", savedFile.length());
+            }
+
+            @Override
+            public void onWearableMessageReceived(MessageEvent messageEvent) {
+                String path = messageEvent.getPath();
+                Log.d("path=%s", path);
+                boolean isSet = IOWatchfaceService.sEngine != null;
+                Log.d("isSet=%s", isSet);
+                Wear.sendMessage(Wear.PATH_MESSAGE_CHECK_WF_SET_REPLY, isSet ? Wear.DATA_OK : Wear.DATA_KO);
             }
         });
     }

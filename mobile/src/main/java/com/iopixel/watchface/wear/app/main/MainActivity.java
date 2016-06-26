@@ -44,6 +44,7 @@ import android.view.View;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.jraf.android.util.about.AboutActivityIntentBuilder;
 import org.jraf.android.util.async.TaskFragment;
 import org.jraf.android.util.dialog.AlertDialogFragment;
@@ -66,9 +67,12 @@ import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceContentVal
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceSelection;
 import com.iopixel.watchface.wear.databinding.MainBinding;
 import com.iopixel.watchface.wear.library.GWDReader;
-import com.iopixel.watchface.wear.library.InstallFailedEvent;
-import com.iopixel.watchface.wear.library.InstallSuccessEvent;
-import com.iopixel.watchface.wear.library.InstallUtil;
+import com.iopixel.watchface.wear.library.install.InstallFailedEvent;
+import com.iopixel.watchface.wear.library.install.InstallSuccessEvent;
+import com.iopixel.watchface.wear.library.install.InstallUtil;
+import com.iopixel.watchface.wear.library.watchfacesetcheck.WatchfaceSetCheckUtil;
+import com.iopixel.watchface.wear.library.watchfacesetcheck.WatchfaceSetNokEvent;
+import com.iopixel.watchface.wear.library.watchfacesetcheck.WatchfaceSetOkEvent;
 
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
@@ -94,6 +98,8 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
 
         // Check if the bundled watchfaces are installed (first time case)
         checkForBundledWatchfaces();
+
+        WatchfaceSetCheckUtil.startWatchfaceSetCheck();
 
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
             // Called from link: start a download or use the provided file
@@ -157,20 +163,47 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
         InstallUtil.installExternalFile(this, file);
     }
 
-    @Subscribe @Keep
+
+    // -------------------------------------------------------------------------
+    // region Events.
+    // -------------------------------------------------------------------------
+
+    @Keep
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onDownloadFailedEvent(DownloadFailedEvent evt) {
         showSnackbar(getString(R.string.download_fail, evt.fileName));
     }
 
-    @Subscribe @Keep
+    @Keep
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onInstallFailedEvent(InstallFailedEvent evt) {
         showSnackbar(getString(R.string.install_fail, evt.fileName));
     }
 
-    @Subscribe @Keep
+    @Keep
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onInstalSuccessEvent(InstallSuccessEvent evt) {
         getWatchfaceGridFragment().setSendingPublicId(evt.publicId);
     }
+
+    @Keep
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    public void onWatchfaceSetOkEvent(WatchfaceSetOkEvent evt) {
+        setPersistentSnackbarText(R.string.main_getWatchfaces);
+        setPersistentSnackbarClickable(true);
+        getWatchfaceGridFragment().setEnabled(true);
+    }
+
+    @Keep
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    public void onWatchfaceSetNokEvent(WatchfaceSetNokEvent evt) {
+        setPersistentSnackbarText(R.string.main_watchfaceNotInstalled);
+        setPersistentSnackbarClickable(false);
+        getWatchfaceGridFragment().setEnabled(false);
+    }
+
+
+    // endregion
 
 
     // -------------------------------------------------------------------------
@@ -289,6 +322,7 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
     protected void onDestroy() {
         WearManager.getInstance().removeWearConsumer(mWearConsumer);
         EventBus.getDefault().unregister(this);
+        WatchfaceSetCheckUtil.stopWatchfaceSetCheck();
         super.onDestroy();
     }
 
@@ -433,10 +467,9 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
     //endregion
 
 
-    public void onGetWatchfacesClick(View view) {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.url_getWatchfaces)));
-        startActivity(browserIntent);
-    }
+    // -------------------------------------------------------------------------
+    // region Snackbar.
+    // -------------------------------------------------------------------------
 
     private void showSnackbar(@StringRes int messageResId) {
         Snackbar.make(mBinding.getRoot(), messageResId, Snackbar.LENGTH_LONG).show();
@@ -445,5 +478,20 @@ public class MainActivity extends AppCompatActivity implements WatchfaceCallback
     private void showSnackbar(String message) {
         Snackbar.make(mBinding.getRoot(), message, Snackbar.LENGTH_LONG).show();
     }
+
+    private void setPersistentSnackbarText(@StringRes int messageResId) {
+        mBinding.conPersistentSnackbar.txtCaption.setText(messageResId);
+    }
+
+    private void setPersistentSnackbarClickable(boolean clickable) {
+        mBinding.conPersistentSnackbar.txtCaption.setClickable(clickable);
+    }
+
+    public void onPersistentSnackbarClick(View view) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.url_getWatchfaces)));
+        startActivity(browserIntent);
+    }
+
+    //endregion
 
 }

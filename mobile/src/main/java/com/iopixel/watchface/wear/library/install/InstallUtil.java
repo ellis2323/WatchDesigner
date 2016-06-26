@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.iopixel.watchface.wear.library;
+package com.iopixel.watchface.wear.library.install;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,6 +30,8 @@ import org.jraf.android.util.log.Log;
 import com.iopixel.library.Storage;
 import com.iopixel.library.Wear;
 import com.iopixel.watchface.wear.backend.provider.watchface.WatchfaceContentValues;
+import com.iopixel.watchface.wear.library.FileUtil;
+import com.iopixel.watchface.wear.library.GWDReader;
 import com.iopixel.watchface.wear.prefs.MainPrefs;
 
 public class InstallUtil {

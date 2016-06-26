@@ -46,6 +46,7 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
     private Set<Long> mSelection;
     @Nullable
     private String mSendingPublicId;
+    private boolean mEnabled;
 
     @Nullable
     @Override
@@ -116,12 +117,11 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
         if (mAdapter == null) {
             mAdapter = new WatchfaceGridAdapter(getActivity(), getCallbacks());
             mBinding.rclGrid.setAdapter(mAdapter);
-            // Restore saved selection (e.g. orientation change)
-            if (mSelection != null) {
-                mAdapter.setSelection(mSelection);
-            }
-            // Restore sending id
+
+            // Restore adapter state (e.g. after orientation change)
+            if (mSelection != null) mAdapter.setSelection(mSelection);
             if (mSendingPublicId != null) mAdapter.setSendingPublicId(mSendingPublicId);
+            mAdapter.setEnabled(mEnabled);
         }
         boolean empty = data.getCount() == 0;
         if (empty) {
@@ -157,5 +157,10 @@ public class WatchfaceGridFragment extends BaseFragment<WatchfaceCallbacks> impl
     public void setSendingPublicId(@Nullable String sendingPublicId) {
         mSendingPublicId = sendingPublicId;
         if (mAdapter != null) mAdapter.setSendingPublicId(sendingPublicId);
+    }
+
+    public void setEnabled(boolean enabled) {
+        mEnabled = enabled;
+        if (mAdapter != null) mAdapter.setEnabled(enabled);
     }
 }

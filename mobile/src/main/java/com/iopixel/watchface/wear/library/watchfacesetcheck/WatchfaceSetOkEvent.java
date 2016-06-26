@@ -13,19 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.iopixel.watchface.wear.library;
+package com.iopixel.watchface.wear.library.watchfacesetcheck;
 
-public class InstallFailedEvent {
-    public enum Reason {
-        CANNOT_COPY_TO_GWD_STORAGE,
-        CANNOT_READ_GWD,
-    }
-
-    public final Reason reason;
-    public final String fileName;
-
-    public InstallFailedEvent(Reason reason, String fileName) {
-        this.reason = reason;
-        this.fileName = fileName;
-    }
+public class WatchfaceSetOkEvent {
 }

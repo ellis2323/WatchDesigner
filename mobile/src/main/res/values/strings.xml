@@ -28,6 +28,7 @@
         <item quantity="other">Watchfaces deleted</item>
     </plurals>
     <string name="main_getWatchfaces"><u>Get watchfaces!</u></string>
+    <string name="main_watchfaceNotInstalled">Please set WatchDesigner on your watch.</string>
     <string name="main_action_about">About</string>
     <string name="main_permissionDenied_readExternalStorage">Could not open the file because the permission was denied</string>
 

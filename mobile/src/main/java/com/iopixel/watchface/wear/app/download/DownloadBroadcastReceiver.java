@@ -29,7 +29,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.jraf.android.util.log.Log;
 import org.jraf.android.util.log.LogUtil;
 
-import com.iopixel.watchface.wear.library.InstallUtil;
+import com.iopixel.watchface.wear.library.install.InstallUtil;
 
 public class DownloadBroadcastReceiver extends BroadcastReceiver {
     @Override

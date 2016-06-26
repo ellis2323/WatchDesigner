@@ -39,7 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
-        android:enabled="@{!adapter.hasSendingPublicId}"
+        android:enabled="@{!adapter.hasSendingPublicId &amp;&amp; adapter.enabled}"
         android:padding="@{@dimen/watchface_grid_item_inter_padding / 2}">
 
         <android.support.v7.widget.CardView
