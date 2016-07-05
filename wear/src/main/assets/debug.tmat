@@ -1,0 +1,9 @@
+{
+    "Description": "Material with alpha blending",
+    "Case0": {
+        "MaterialType": "GLSL",
+	"Shader": "internal_glsl_solid",
+	"Blending": "ONE ONE_MINUS_SRC_ALPHA",
+        "ZBuffer": "NEVER"
+    }
+}
