@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 24
     buildToolsVersion "${project.buildToolsVersion}"
 
     defaultConfig {
         applicationId 'com.iopixel.watchface.wear'
         minSdkVersion 22
-        targetSdkVersion 23
+        targetSdkVersion 24
         versionCode buildNumber
         versionName buildProperties['versionName']
 
